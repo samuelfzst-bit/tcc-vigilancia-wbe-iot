@@ -24,7 +24,6 @@ Atualizado em 2026-10-03. Este documento registra decisões do estudo; não é u
 4. Executar ablação: epidemiologia, clima e combinado.
 5. Registrar commit, versão do dataset, SHA-256, seed e métricas de cada execução.
 6. Não interpretar associação preditiva como causalidade.
-
 ## 2026-10-06 — modelagem v2
 
 - Manter 2024 bloqueado para avaliação final única.
