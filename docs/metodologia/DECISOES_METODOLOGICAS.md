@@ -24,3 +24,13 @@ Atualizado em 2026-10-03. Este documento registra decisões do estudo; não é u
 4. Executar ablação: epidemiologia, clima e combinado.
 5. Registrar commit, versão do dataset, SHA-256, seed e métricas de cada execução.
 6. Não interpretar associação preditiva como causalidade.
+
+## 2026-10-06 — modelagem v2
+
+- Manter 2024 bloqueado para avaliação final única.
+- Selecionar hiperparâmetros em folds temporais expansivos de 2018 a 2022.
+- Usar 2023 como validação final pré-teste.
+- Manter MAE como métrica principal; RMSE, estabilidade e MAE em picos como critérios auxiliares.
+- Incluir Tweedie para avaliar sobredispersão, sem presumir que vencerá o modelo mais simples.
+- Executar sensibilidade ao período de cobertura climática e às janelas longas.
+- Não criar um modelo supervisionado de qualidade da água sem rótulos laboratoriais.
