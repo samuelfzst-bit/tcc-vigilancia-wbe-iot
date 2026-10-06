@@ -1,7 +1,15 @@
-# CSV files (heavy data files)
+# Data and trained artifacts
 *.csv
+*.parquet
+*.feather
+*.joblib
+*.pkl
+*.onnx
 data/raw/
 data/processed/
+artifacts/models/
+artifacts/snapshots/
+artifacts/runs/
 
 # Python
 __pycache__/
@@ -43,6 +51,8 @@ wheels/
 # Environment
 .env
 .env.local
+*.pem
+*.key
 
 # Node modules (for frontend)
 node_modules/

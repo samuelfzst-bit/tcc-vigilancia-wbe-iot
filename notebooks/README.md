@@ -1,26 +1,8 @@
-# 📓 Notebooks
+# Notebooks
 
-Jupyter Notebooks para Data Science e análise de dados.
+Ordem oficial:
 
-## Notebooks Disponíveis
+1. `01_extracao_e_auditoria.ipynb`: consulta a view privada, valida o contrato temporal e gera snapshot versionado.
+2. Treino: execute `scripts/train_models.py` sobre o snapshot aprovado. Por padrão, o script não abre o teste de 2024.
 
-### `01_exploracao_dados.ipynb`
-Notebook completo para:
-- ✅ Exploração dos dados SINAN e INMET
-- 🧹 Limpeza e tratamento de valores ausentes
-- 📊 Normalização e padronização
-- 🔗 Merge dos datasets
-- 📈 Análise exploratória (EDA)
-- 💾 Exportação dos dados processados
-
-**Como executar:**
-```bash
-jupyter notebook 01_exploracao_dados.ipynb
-```
-
-## 🚀 Próximos Passos
-
-Adicionar notebooks para:
-- Análise de séries temporais
-- Modelagem preditiva
-- Validação de índice WBE
+O notebook anterior foi preservado em `archive/` apenas para rastreabilidade. Ele não deve ser usado porque antecede as decisões atuais de cenário, disponibilidade e split.
