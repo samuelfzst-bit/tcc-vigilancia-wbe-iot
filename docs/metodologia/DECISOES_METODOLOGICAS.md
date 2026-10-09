@@ -8,6 +8,7 @@ Atualizado em 2026-10-03. Este documento registra decisões do estudo; não é u
 | Geografia principal | Município de São Paulo | Mantém coerência entre casos, estação meteorológica A701 e capacidade de execução. Ampliação geográfica exigiria novas estações e modelagem espacial. |
 | Cenário | Residentes, excluindo importados conhecidos | Reduz atribuição indevida de exposição externa ao clima local. Cenários alternativos ficam apenas para sensibilidade. |
 | Disponibilidade | `DT_ENCERRA` | Aproxima o momento em que a confirmação estaria utilizável. `DT_NOTIFIC` foi descartada como proxy principal. |
+| Challenger final | XGBoost com objetivo Poisson | Comparação controlada com o Poisson, sem abrir 2024 e com regra de substituição pré-registrada. |
 | Frequência | Semana epidemiológica | Compatível com baixa contagem diária e com a disponibilidade dos dados. |
 | Horizontes | `t+1` e `t+2` | Entrega antecedência operacional mensurável sem extrapolação excessiva. |
 | Divisão | Treino até 2022, validação 2023, teste 2024 | Preserva ordem temporal e mantém um período final intocado. |
@@ -33,3 +34,10 @@ Atualizado em 2026-10-03. Este documento registra decisões do estudo; não é u
 - Incluir Tweedie para avaliar sobredispersão, sem presumir que vencerá o modelo mais simples.
 - Executar sensibilidade ao período de cobertura climática e às janelas longas.
 - Não criar um modelo supervisionado de qualidade da água sem rótulos laboratoriais.
+
+## 2026-10-09 — challenger XGBoost
+
+- Comparar XGBoost e Poisson com exatamente o mesmo conjunto de features climáticas.
+- Escolher a configuração do XGBoost apenas nos folds 2018–2022.
+- Exigir ganho mínimo de 5% no MAE de 2023 e estabilidade aceitável para substituir o Poisson.
+- Manter 2024 bloqueado durante todo o experimento.
