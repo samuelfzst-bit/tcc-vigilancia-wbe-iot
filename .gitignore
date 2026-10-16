@@ -53,6 +53,8 @@ wheels/
 .env.local
 *.pem
 *.key
+.streamlit/secrets.toml
+frontend/.streamlit/secrets.toml
 
 # Node modules (for frontend)
 node_modules/
