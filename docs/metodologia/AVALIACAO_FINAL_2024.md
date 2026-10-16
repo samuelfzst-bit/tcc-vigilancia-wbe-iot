@@ -68,3 +68,34 @@ O diretório final contém:
 6. modelos Poisson ajustados para `t+1` e `t+2`;
 7. recibo da abertura única;
 8. resumo Markdown e manifesto final com hashes dos arquivos.
+
+## Resultado observado no holdout
+
+A execução oficial `20261016T035301Z`, vinculada ao commit `6f18032`, foi
+concluída com o repositório limpo e todos os artefatos registrados no manifesto.
+
+| Horizonte | MAE | IC95% descritivo | RMSE | Viés | Razão de calibração |
+|---:|---:|---:|---:|---:|---:|
+| `t+1` | 1,368 | [0,976; 1,875] | 1,796 | +0,297 | 1,111 |
+| `t+2` | 1,359 | [0,951; 1,898] | 1,896 | +0,310 | 1,116 |
+
+O modelo superou o baseline mais competitivo, a média histórica da semana,
+em aproximadamente 14,6% no MAE de `t+1` e 14,7% no MAE de `t+2`. Essas são
+reduções observadas; não foi calculado um intervalo pareado para afirmar
+superioridade estatística.
+
+No alerta congelado de 4 casos, `t+1` apresentou precisão de 0,800, recall de
+0,857 e F1 de 0,828. Para `t+2`, os três indicadores foram 0,714. O segundo
+horizonte é tratado como complementar por carregar maior incerteza operacional.
+
+O ano de 2024 apresentou média, variabilidade e pico inferiores aos de 2023.
+Por isso, erros menores no teste não devem ser descritos isoladamente como
+"melhora do modelo". A conclusão aceita é que houve generalização temporal e
+ganho observado contra os baselines no período reservado.
+
+## Continuação pós-teste
+
+O notebook `05_analise_pos_hoc_2024_colab.ipynb` produz análise de erros,
+sensibilidade de limiares e interpretação dos coeficientes. O corte de 2 casos
+é usado somente como nível exploratório de atenção na interface. A avaliação
+confirmatória e o alerta oficial continuam usando o limiar congelado de 4.
