@@ -185,9 +185,12 @@ def dashboard_predictions(
     """Prepara o contrato de dados para a futura tabela do dashboard."""
 
     frame = predictions.copy()
-    frame["inicio_semana_alvo"] = pd.to_datetime(
-        frame["inicio_semana_alvo"]
+    target_dates = pd.to_datetime(frame["inicio_semana_alvo"])
+    frame["inicio_semana_t"] = (
+        target_dates - pd.to_timedelta(frame["horizonte"] * 7, unit="D")
     ).dt.date
+    frame["inicio_semana_alvo"] = target_dates.dt.date
+    frame["cenario_geografico"] = "principal_sem_importados_conhecidos"
     frame["nivel_previsto"] = np.select(
         [
             frame["previsto"].ge(OFFICIAL_ALERT_THRESHOLD),
@@ -204,6 +207,8 @@ def dashboard_predictions(
     frame["git_commit"] = manifest["git_commit"]
     frame["analise_pos_hoc"] = False
     columns = [
+        "cenario_geografico",
+        "inicio_semana_t",
         "inicio_semana_alvo",
         "horizonte",
         "observado",
