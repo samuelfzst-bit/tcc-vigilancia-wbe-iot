@@ -57,6 +57,12 @@ def test_dashboard_uses_attention_without_changing_alert() -> None:
     assert result["nivel_previsto"].tolist() == ["normal", "atencao", "atencao", "alerta"]
     assert result["limiar_alerta"].eq(4).all()
     assert result["limiar_atencao"].eq(2).all()
+    assert result["cenario_geografico"].eq(
+        "principal_sem_importados_conhecidos"
+    ).all()
+    assert pd.to_datetime(result["inicio_semana_alvo"]).sub(
+        pd.to_datetime(result["inicio_semana_t"])
+    ).dt.days.eq(7).all()
 
 
 def test_integrity_check_rejects_changed_file(tmp_path: Path) -> None:
