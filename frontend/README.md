@@ -10,53 +10,52 @@ Dashboard interativo para visualização dos dados WBE-IoT.
 
 > Streamlit foi escolhido por sua simplicidade e prototipagem rápida. Se preferir React/Vue no futuro, considere migrar.
 
-## 🎨 Componentes (A Implementar)
+## Componentes implementados
 
-- 📈 Gráficos de série temporal do WBE Index
-- 🗺️ Mapa interativo das estações ETE
-- 📊 Comparação entre SINAN, INMET e WBE
-- 🔔 Alertas de anomalias
-- 📥 Upload e download de dados
+- série observada versus previsão Poisson em `t+1` e `t+2`;
+- níveis normal, atenção e alerta;
+- leituras recentes de pH, turbidez, TDS e temperatura;
+- separação visual e conceitual entre epidemiologia e IoT;
+- página de metodologia e limitações.
 
 ## 🚀 Como Executar
 
 ### 1. Instalar dependências
 ```bash
-cd frontend
-pip install streamlit plotly pandas
+pip install -r requirements/frontend.txt
+cp frontend/.streamlit/secrets.toml.example frontend/.streamlit/secrets.toml
+# Edite somente a cópia local e informe TCC_DB_URL.
 ```
 
 ### 2. Executar o dashboard
 ```bash
-streamlit run app.py
+streamlit run frontend/app.py
 ```
 
 O dashboard será aberto em: `http://localhost:8501`
 
-## 📁 Estrutura (A Implementar)
+## Estrutura
 
 ```
 /frontend
 ├── app.py              # Aplicação principal
-├── pages/              # Páginas do dashboard
-│   ├── home.py
-│   ├── analysis.py
-│   └── alerts.py
-└── components/         # Componentes reutilizáveis
+├── data_access.py      # Consultas somente leitura
+├── domain.py           # Regras de apresentação
+└── .streamlit/
+    └── secrets.toml.example
 ```
 
-## 🎯 Funcionalidades Planejadas
+## Próximas funcionalidades
 
-- [ ] Conexão com API Backend
-- [ ] Real-time updates via WebSocket
+- [x] Conexão server-side com Supabase/PostgreSQL
+- [x] Previsões finais e telemetria no mesmo dashboard
+- [ ] Atualização por Realtime/WebSocket
 - [ ] Exportar relatórios em PDF
 - [ ] Sistema de alertas
 - [ ] Análise preditiva
 
 ## 🔧 Configuração
 
-Edite `config.py` ou use variáveis de ambiente:
-```python
-API_URL = "http://localhost:8000"
-REFRESH_INTERVAL = 5  # segundos
-```
+Use o segredo `TCC_DB_URL` no servidor. A URI nunca deve ser exibida na página,
+salva no Git ou enviada ao navegador. O banco mantém RLS e não permite leitura
+anônima das previsões ou da telemetria.
