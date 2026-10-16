@@ -6,6 +6,7 @@ Ordem oficial:
 2. `02_modelagem_v2_colab.ipynb`: executa validação temporal, seleção de hiperparâmetros e sensibilidade sobre o snapshot aprovado.
 3. `03_xgboost_challenger_colab.ipynb`: compara Poisson e XGBoost com regra de substituição pré-registrada, sem abrir 2024.
 4. `04_avaliacao_final_2024_colab.ipynb`: congela o protocolo e, após confirmação explícita, abre 2024 uma única vez para o teste final.
+5. `05_analise_pos_hoc_2024_colab.ipynb`: audita erros, limiares e coeficientes depois do teste, sem retreinar ou substituir o modelo congelado.
 
 O treino v2 usa `scripts/train_models_v2.py`. O script não possui opção para abrir
 o teste de 2024 e salva os resultados em `MyDrive/TCC/model_runs_v2`.
@@ -17,5 +18,9 @@ A avaliação final usa `scripts/run_final_evaluation.py` em duas fases e salva
 os resultados em `MyDrive/TCC/final_evaluation`. A primeira fase grava o
 manifesto pré-teste; a segunda exige a confirmação literal definida no
 notebook e registra um recibo persistente para impedir reexecução do holdout.
+
+A análise pós-hoc usa `scripts/analyze_posthoc_2024.py`. Seus resultados são
+descritivos: o limiar de 4 permanece oficial e a faixa de atenção iniciada em
+2 casos existe somente como camada operacional exploratória do dashboard.
 
 O notebook anterior foi preservado em `archive/` apenas para rastreabilidade. Ele não deve ser usado porque antecede as decisões atuais de cenário, disponibilidade e split.
