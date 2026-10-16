@@ -30,6 +30,18 @@ artifacts/       convenção para métricas e modelos, sem binários no Git
 
 Consulte [QUICKSTART.md](QUICKSTART.md). O primeiro passo da modelagem é executar `notebooks/01_extracao_e_auditoria.ipynb`, nunca o notebook legado arquivado.
 
+## Resultado final de modelagem
+
+O campeão pré-registrado foi a regressão de Poisson regularizada (`alpha=1`).
+No holdout temporal único de 2024, o MAE foi de **1,368 caso/semana em `t+1`**
+e **1,359 em `t+2`**, com redução observada de aproximadamente 15% contra o
+baseline sazonal mais competitivo. O alerta estatístico oficial permanece em
+4 casos semanais; previsões entre 2 e menos de 4 podem ser exibidas apenas como
+nível exploratório de atenção.
+
+Consulte `docs/metodologia/AVALIACAO_FINAL_2024.md` e
+`docs/metodologia/ANALISE_POS_HOC_2024.md` para resultados e limitações.
+
 ## Equipe
 
 - Samuel: ciência de dados e modelagem.
