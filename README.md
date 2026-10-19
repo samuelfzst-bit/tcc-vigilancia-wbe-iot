@@ -35,12 +35,36 @@ Consulte [QUICKSTART.md](QUICKSTART.md). O primeiro passo da modelagem é execut
 O campeão pré-registrado foi a regressão de Poisson regularizada (`alpha=1`).
 No holdout temporal único de 2024, o MAE foi de **1,368 caso/semana em `t+1`**
 e **1,359 em `t+2`**, com redução observada de aproximadamente 15% contra o
-baseline sazonal mais competitivo. O alerta estatístico oficial permanece em
-4 casos semanais; previsões entre 2 e menos de 4 podem ser exibidas apenas como
-nível exploratório de atenção.
+baseline sazonal mais competitivo. O limiar principal pré-especificado
+permanece em 4 casos semanais; previsões entre 2 e menos de 4 podem ser exibidas
+apenas como nível exploratório de atenção. Esse limiar pertence ao protótipo
+acadêmico e não constitui um alerta oficial de saúde pública.
 
 Consulte `docs/metodologia/AVALIACAO_FINAL_2024.md` e
 `docs/metodologia/ANALISE_POS_HOC_2024.md` para resultados e limitações.
+
+## Executar o dashboard
+
+O dashboard integrado usa Streamlit e consulta somente as tabelas autorizadas
+do Supabase. A credencial nunca deve ser salva no Git.
+
+```bash
+python -m venv .venv
+pip install -r requirements/frontend.txt
+streamlit run frontend/app.py
+```
+
+Antes da execução, cada integrante deve criar localmente
+`frontend/.streamlit/secrets.toml` a partir do arquivo de exemplo e receber uma
+URI PostgreSQL de **somente leitura** por canal privado.
+
+Consulte o passo a passo completo, incluindo Windows/PowerShell, Linux/macOS e
+solução de erros comuns, em
+[docs/EXECUTAR_DASHBOARD.md](docs/EXECUTAR_DASHBOARD.md).
+
+As previsões atualmente exibidas são resultados retrospectivos do holdout de
+2024. A telemetria IoT é um módulo físico separado; a previsão operacional
+recente ainda está em desenvolvimento.
 
 ## Equipe
 

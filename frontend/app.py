@@ -60,16 +60,22 @@ with tab_prediction:
     level = str(latest["nivel_previsto"])
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Previsão mais recente", f"{latest['previsto']:.2f} casos")
+    c1.metric("Última previsão do teste", f"{latest['previsto']:.2f} casos")
     c2.metric("Nível", level_label(level))
     c3.metric("Atenção", f"≥ {latest['limiar_atencao']:.0f} casos")
-    c4.metric("Alerta", f"≥ {latest['limiar_alerta']:.0f} casos")
+    c4.metric("Limiar principal", f"≥ {latest['limiar_alerta']:.0f} casos")
+    target_date = latest["inicio_semana_alvo"].strftime("%d/%m/%Y")
+    st.caption(
+        f"Semana-alvo da última previsão: {target_date}. "
+        "Resultados retrospectivos do holdout de 2024; não representam uma "
+        "previsão produzida na data atual."
+    )
 
     figure = go.Figure()
     figure.add_trace(
         go.Scatter(
             x=frame["inicio_semana_alvo"], y=frame["observado"],
-            name="Observado", line={"color": "#111827"}
+            name="Observado", line={"color": "#e5e7eb", "width": 2.5}
         )
     )
     figure.add_trace(
@@ -84,7 +90,7 @@ with tab_prediction:
     )
     figure.add_hline(
         y=float(latest["limiar_alerta"]), line_dash="dash",
-        line_color="#dc2626", annotation_text="Alerta oficial"
+        line_color="#dc2626", annotation_text="Limiar principal"
     )
     figure.update_layout(
         title=f"Casos semanais — t+{horizon}",
@@ -92,8 +98,9 @@ with tab_prediction:
     )
     st.plotly_chart(figure, use_container_width=True)
     st.info(
-        "O nível de atenção (2 a menos de 4) é exploratório. O alerta oficial "
-        "permanece em 4 casos, definido antes da abertura do teste de 2024."
+        "O nível de atenção (2 a menos de 4) é exploratório. O limiar principal "
+        "do protótipo permanece em 4 casos e foi pré-especificado antes da "
+        "abertura do teste de 2024."
     )
 
 with tab_iot:
@@ -133,7 +140,8 @@ with tab_method:
         """
         - **Modelo epidemiológico:** Poisson regularizado, treinado com clima e sazonalidade.
         - **Horizontes:** uma e duas semanas à frente.
-        - **Alerta oficial:** previsão de pelo menos 4 casos semanais.
+        - **Limiar principal do protótipo:** previsão de pelo menos 4 casos semanais, pré-especificado antes da avaliação de 2024.
+        - **Avaliação histórica:** as previsões atualmente exibidas pertencem ao holdout temporal de 2024, não a uma execução em tempo real.
         - **IoT físico:** mede pH, turbidez, TDS e temperatura e comprova o fluxo sensor → MQTT → Supabase.
         - **Limite:** integração visual não significa que os sensores diagnosticam leptospirose.
         """
