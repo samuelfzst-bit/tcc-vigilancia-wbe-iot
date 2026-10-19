@@ -13,10 +13,18 @@ def database_url(streamlit_secrets=None) -> str:
     value = os.getenv("TCC_DB_URL")
     if not value and streamlit_secrets is not None:
         value = streamlit_secrets.get("TCC_DB_URL")
-    if not value or not value.startswith(("postgresql://", "postgres://")):
+    if not value or not value.startswith(
+        ("postgresql+psycopg://", "postgresql://", "postgres://")
+    ):
         raise RuntimeError(
             "Defina TCC_DB_URL nos segredos do Streamlit ou no ambiente do servidor."
         )
+    # O projeto instala psycopg 3. Tornar o driver explícito evita que o
+    # SQLAlchemy tente importar o psycopg2 quando a URI vem do Supabase.
+    if value.startswith("postgresql://"):
+        return value.replace("postgresql://", "postgresql+psycopg://", 1)
+    if value.startswith("postgres://"):
+        return value.replace("postgres://", "postgresql+psycopg://", 1)
     return value
 
 
