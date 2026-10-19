@@ -9,8 +9,8 @@ do repositório.
 - Git;
 - Python 3.11 recomendado;
 - acesso à internet;
-- URI PostgreSQL de somente leitura fornecida por Samuel ou Larissa em canal
-  privado.
+- URI PostgreSQL do papel `tcc_dashboard_app`, fornecida por Samuel ou Larissa
+  em canal privado.
 
 Nunca envie a URI em prints, issues, commits ou mensagens públicas. Não use o
 usuário administrador `postgres` nem a chave `service_role` para executar o
@@ -81,6 +81,11 @@ TCC_DB_URL = "postgresql+psycopg://USUARIO:SENHA@HOST:6543/postgres"
 Use a URI entregue pelos responsáveis pelo banco. Senhas com caracteres
 especiais precisam estar corretamente codificadas na URI. Não tente corrigir a
 conexão movendo a senha para a parte do endereço do host.
+
+O login compartilhado foi limitado a cinco conexões, opera em modo somente
+leitura e acessa apenas `tcc_previsoes_epidemiologicas` e `leituras_sensor`.
+Ele não possui acesso às tabelas epidemiológicas brutas nem permissão para
+inserir, atualizar ou excluir registros.
 
 O arquivo `frontend/.streamlit/secrets.toml` já está no `.gitignore`. Confirme
 antes de qualquer commit:
