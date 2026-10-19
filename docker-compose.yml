@@ -1,55 +1,12 @@
-version: '3.8'
-
 services:
-  # MQTT Broker - Mosquitto
   mosquitto:
-    image: eclipse-mosquitto:latest
+    image: eclipse-mosquitto:2
     container_name: wbe-mqtt-broker
     ports:
-      - "1883:1883"    # MQTT
-      - "9001:9001"    # WebSocket
+      - "1883:1883"
+      - "9001:9001"
     volumes:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
     restart: unless-stopped
-    networks:
-      - wbe-network
-
-  # PostgreSQL - Banco de Dados
-  postgres:
-    image: postgres:15-alpine
-    container_name: wbe-database
-    environment:
-      POSTGRES_USER: wbe_user
-      POSTGRES_PASSWORD: wbe_password
-      POSTGRES_DB: wbe_database
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    networks:
-      - wbe-network
-
-  # pgAdmin - Interface para gerenciar PostgreSQL
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: wbe-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@wbe.local
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    restart: unless-stopped
-    networks:
-      - wbe-network
-
-volumes:
-  postgres_data:
-
-networks:
-  wbe-network:
-    driver: bridge
