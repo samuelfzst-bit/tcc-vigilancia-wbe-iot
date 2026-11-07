@@ -47,3 +47,7 @@ wheels/
 # Node modules (for frontend)
 node_modules/
 npm-debug.log
+
+# Credenciais do dashboard
+.streamlit/secrets.toml
+frontend/.streamlit/secrets.toml
