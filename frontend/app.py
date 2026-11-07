@@ -80,7 +80,7 @@ def table(frame, **kwargs):
     names = {**LABELS, "data_hora":"Data e hora (Brasília)", "inicio_semana_alvo":"Semana de referência",
              "previsto":"Casos estimados", "observado":"Casos observados provisórios", "nivel_previsto":"Classificação",
              "limiar_atencao":"Limiar de atenção", "limiar_alerta":"Limiar de alerta",
-             "device_id":"Dispositivo", "indicadores_com_desvio":"Indicadores com alteração relevante",
+             "device_id":"Dispositivo", "indicadores_com_desvio":"Indicadores com mudança estatisticamente atípica",
              "erro_previsto_menos_observado":"Diferença (estimado − observado provisório)", "criado_em":"Publicação (Brasília)",
              "observado_provisorio":"Observado provisório", "status_observado":"Disponibilidade do observado",
              "gerado_em":"Geração (Brasília)", "tipo_previsao":"Tipo de previsão", "data_corte":"Corte dos dados",
@@ -111,8 +111,8 @@ def show(fig, navigable=False, *, date_only=False, sensor_overview=False):
     for trace in fig.data:
         values = getattr(trace, "x", None)
         if values is not None and len(values) and isinstance(values[0], (pd.Timestamp, datetime, np.datetime64)):
-            if not date_only:
-                trace.x = pd.to_datetime(values, utc=True).tz_convert(BRASILIA).tz_localize(None)
+            # Preserve o instante com fuso. Remover o fuso aqui fazia o Plotly/ navegador
+            # interpretar o horário de Brasília como UTC e deslocá-lo mais três horas.
             if trace.type in ("scatter", "scattergl") and trace.hoverinfo != "skip":
                 trace.hovertemplate = "%{x|" + date_format + "}" + date_suffix + "<br>Valor: %{y:.2f}<extra>%{fullData.name}</extra>"
             axis = "xaxis" + ((getattr(trace, "xaxis", None) or "x")[1:])
@@ -244,7 +244,7 @@ if not selected.empty:
 forecast_frame = latest_forecast_series(p)
 
 home,validation,detail,entries,method=st.tabs([
-    "Visão geral", "Validação Histórica", "Sensor Individual", "Qualidade dos Dados", "Metodologia"
+    "Visão geral", "Avaliação Final 2024", "Sensor Individual", "Qualidade e Disponibilidade", "Metodologia"
 ])
 with home:
     st.subheader("Panorama epidemiológico", help="A classificação usa a última execução da visão operacional. A geração é a data em que o modelo produziu o resultado; a semana-alvo é o período estimado. Previsões reconstruídas e observados provisórios são identificados, sem substituição de ausentes por zero.")
@@ -276,7 +276,7 @@ with home:
                 st.caption("Casos observados indisponíveis nesta execução. A curva mostra as estimativas; MAE e viés aguardam dados observados.")
 
             fig=go.Figure()
-            for field,label,color,dash in [("observado","Observado","#94a3b8","solid"),("previsto","Estimativa do modelo","#67c5da","solid"),("limiar_atencao","Limiar de atenção","#f59e0b","dot"),("limiar_alerta","Limiar principal","#ef4444","dash")]:
+            for field,label,color,dash in [("observado","Observado","#94a3b8","solid"),("previsto","Estimativa do modelo","#67c5da","solid"),("limiar_atencao","Limiar de atenção","#f59e0b","dot"),("limiar_alerta","Limiar de alerta","#ef4444","dash")]:
                 if field == "observado":
                     if not chart_frame["observado"].notna().any():
                         continue
@@ -293,7 +293,8 @@ with home:
 
 
     st.divider()
-    st.subheader("Entrada dos sensores")
+    st.subheader("Telemetria ambiental IoT")
+    st.caption("Camada física demonstrativa, analisada separadamente. Estas leituras não foram variáveis de entrada do modelo epidemiológico Poisson e não diagnosticam leptospirose.")
     render_telemetry_summary(selected, filtered, LABELS, metrics=False)
     latest_cards(filtered)
     if filtered.empty:
@@ -312,7 +313,7 @@ with home:
                 st.info(f"{label}: {exc}")
             plotted = hide_edge_zeros(filtered, col)
             flagged=plotted.loc[plotted[col+"_desvio"] & plotted[col].notna()]
-            fig.add_trace(go.Scatter(x=flagged["data_hora"] if not flagged.empty else [None],y=flagged[col] if not flagged.empty else [None],name="Alteração relevante",legendrank=5,legendgroup="alteracao_relevante",showlegend=row == 1,text=[label]*len(flagged),hovertemplate="%{text}: %{y}<br>%{x}<extra>Alteração relevante</extra>",mode="markers",marker=dict(color="#ef4444",size=7)),row=row,col=1)
+            fig.add_trace(go.Scatter(x=flagged["data_hora"] if not flagged.empty else [None],y=flagged[col] if not flagged.empty else [None],name="Mudança estatisticamente atípica",legendrank=5,legendgroup="alteracao_relevante",showlegend=row == 1,text=[label]*len(flagged),hovertemplate="%{text}: %{y}<br>%{x}<extra>Mudança estatisticamente atípica</extra>",mode="markers",marker=dict(color="#ef4444",size=7)),row=row,col=1)
             fig.update_yaxes(title_text=label,row=row,col=1, rangemode="tozero" if col=="ph_value" else "normal")
         fig.update_layout(height=1100,title="Evolução dos quatro sensores — escalas independentes",hovermode="x unified")
         fig.update_annotations(yshift=12, yanchor="bottom", font=dict(size=15))
@@ -322,21 +323,23 @@ with home:
         show(fig, sensor_overview=True)
         st.caption("Ao agrupar, a linha mostra a média de cada intervalo. O ponto vermelho marca uma leitura real com mudança estatisticamente incomum, mesmo que a linha mostre médias. Zeros nas pontas dos quatro sensores ficam ocultos na linha e nos marcadores; tabelas e cálculos preservam esses registros. Trechos sem leituras ficam interrompidos; na série original, a quebra ocorre quando o intervalo entre leituras supera 7min30s.")
 with validation:
-    st.subheader("Validação Histórica", help="Comparação retrospectiva com os casos observados da tabela de avaliação histórica. MAE, RMSE e viés medem erros em casos; não representam uma porcentagem de acurácia nem garantem desempenho futuro.")
+    st.subheader("Avaliação final no holdout de 2024", help="Comparação retrospectiva no período de teste temporal que permaneceu bloqueado durante a seleção do modelo. MAE, RMSE e viés medem erros em casos; não representam porcentagem de acurácia nem garantem desempenho futuro.")
     if historical_result.issue:
-        st.warning("Avaliação histórica indisponível nesta atualização. " + historical_result.issue.message)
+        st.warning("Avaliação final de 2024 indisponível nesta atualização. " + historical_result.issue.message)
     elif historical_missing:
-        st.warning("Campos ausentes na avaliação histórica: " + ", ".join(historical_missing))
+        st.warning("Campos ausentes na avaliação final de 2024: " + ", ".join(historical_missing))
     elif latest_forecast_series(historical).empty:
-        st.info("Nenhuma avaliação histórica de uma semana disponível nesta execução.")
+        st.info("Nenhuma avaliação final de uma semana disponível nesta execução.")
     else:
         history = latest_forecast_series(historical)
         start_date = history['inicio_semana_alvo'].min().strftime("%d/%m/%Y")
         end_date = history['inicio_semana_alvo'].max().strftime("%d/%m/%Y")
-        st.markdown(f'<div class="telemetry-strip"><strong>Avaliação retrospectiva</strong><span>Série completa: {start_date} a {end_date}</span><span>Antecedência: 1 semana</span></div>', unsafe_allow_html=True)
-        with st.expander("Como interpretar a Validação Histórica"):
-            st.write("Compara estimativas com os casos observados de toda a série histórica disponível na última execução, com uma semana de antecedência. Os indicadores usam somente semanas com os dois valores válidos; zero observado continua válido.")
-            st.caption("Os resultados descrevem o desempenho nesse período. Não representam percentual de acurácia nem garantem o desempenho das previsões operacionais da Visão geral.")
+        model_name = str(history.iloc[-1].get("modelo", "Poisson"))
+        model_version = str(history.iloc[-1].get("versao_modelo", "avaliação final"))
+        st.markdown(f'<div class="telemetry-strip"><strong>Teste temporal bloqueado</strong><span>Período: {start_date} a {end_date}</span><span>Antecedência: 1 semana</span><span>Modelo: {escape(model_name)} • {escape(model_version)}</span></div>', unsafe_allow_html=True)
+        with st.expander("Como interpretar a avaliação final"):
+            st.write("Compara as estimativas com os casos observados no holdout temporal de 2024, mantido fora do ajuste e da escolha do modelo. Os indicadores usam somente semanas com os dois valores válidos; zero observado continua válido.")
+            st.caption("Treino: 2010–2022. Validação e seleção: 2023. Teste final bloqueado: 2024. Os resultados não são percentual de acurácia nem garantem o desempenho das estimativas operacionais reconstruídas da Visão geral.")
         scores = historical_metrics(history)
         if scores is None:
             st.info("Não há semanas com casos observados e estimados disponíveis para calcular os indicadores.")
@@ -359,7 +362,7 @@ with validation:
             fig.add_trace(go.Scatter(x=history["inicio_semana_alvo"], y=history[field],
                 name=label, mode="lines+markers" if field in ("observado", "previsto") else "lines",
                 marker=dict(size=4), line=dict(color=color, dash=dash, width=2), connectgaps=False))
-        fig.update_layout(title="Casos observados × estimados — avaliação histórica",
+        fig.update_layout(title="Casos observados × estimados — holdout final de 2024",
                           xaxis_title="Semana-alvo", yaxis_title="Casos", hovermode="x unified", height=470)
         fig.update_yaxes(rangemode="tozero")
         show(fig, navigable=True, date_only=True)
@@ -401,9 +404,9 @@ with detail:
         if values.empty:
             st.info("O indicador selecionado não possui valores numéricos válidos neste período.")
         elif values.nunique() == 1:
-            st.info(f"Valor constante no período: {value(values.iloc[0])} em {len(values)} leituras válidas. A linha reta representa os dados recebidos; não comprova precisão, calibração ou funcionamento do sensor.")
+            st.info(f"Valor constante no período: {value(values.iloc[0])} em {len(values)} registros numéricos. A linha reta representa os dados recebidos; não comprova precisão, calibração ou funcionamento do sensor.")
         else:
-            st.caption(f"{len(values)} leituras válidas • {values.nunique()} valores distintos • amplitude: {value(values.max() - values.min())}.")
+            st.caption(f"{len(values)} registros numéricos • {values.nunique()} valores distintos • amplitude: {value(values.max() - values.min())}.")
         detail_chart = break_line_at_gaps(filtered,[col])
         fig=go.Figure()
         fig.add_trace(go.Scatter(x=detail_chart["data_hora"],y=detail_chart[col],name=label,mode="lines",line=dict(color=COLORS[col],width=2),connectgaps=False))
@@ -414,33 +417,33 @@ with detail:
         st.caption("A linha mostra os valores recebidos, sem faixas ou curvas adicionais. Zeros nas pontas ficam ocultos somente na linha; os registros permanecem nos cards e na contagem diária. Lacunas acima de 7min30s interrompem a linha.")
         if len(filtered) == 1:
             st.info("Há apenas um registro no período; uma linha exige ao menos dois pontos. Consulte o valor nos cards.")
-        st.subheader("Análises registradas por dia")
+        st.subheader("Leituras registradas por dia")
         try:
             daily_counts = daily_summary(filtered,col)
             daily_fig = go.Figure(go.Scatter(
                 x=daily_counts["data_hora"], y=daily_counts["leituras_validas"],
-                name="Análises válidas", mode="lines+markers",
+                name="Leituras com valor preenchido", mode="lines+markers",
                 line=dict(color=COLORS[col],width=2), marker=dict(size=6), connectgaps=False,
             ))
-            daily_fig.update_layout(title=f"{label} — quantidade de análises por dia",xaxis_title="Dia (Brasília)",yaxis_title="Análises registradas",height=350)
+            daily_fig.update_layout(title=f"{label} — quantidade de leituras por dia",xaxis_title="Dia (Brasília)",yaxis_title="Leituras registradas",height=350)
             daily_fig.update_yaxes(rangemode="tozero",dtick=1 if daily_counts["leituras_validas"].max() <= 10 else None)
             show(daily_fig,date_only=True)
-            st.caption("Cada análise corresponde a um registro com valor numérico válido do indicador, inclusive zero. Atualizações da tela a cada 30 segundos não contam como novas análises. A contagem usa apenas os registros do dispositivo e período selecionados retornados pela consulta (até 1.000 no total); dias parciais e lacunas não comprovam falha do sensor. Datas agrupadas pelo dia de Brasília.")
+            st.caption("Cada leitura corresponde a um registro com valor numérico preenchido do indicador, inclusive zero. Atualizações da tela a cada 30 segundos não contam como novas leituras. A contagem usa apenas os registros do dispositivo e período selecionados retornados pela consulta (até 1.000 no total); dias parciais e lacunas não comprovam falha do sensor. Datas agrupadas pelo dia de Brasília.")
         except DisplayRangeError as exc:
             st.warning(str(exc))
-        st.subheader("Análises e Comparação com a Média")
+        st.subheader("Leituras e comparação com a média móvel")
         comparison_table = filtered[["data_hora", col, col+"_media"]].copy()
         comparison_table["Variação"] = comparison_table[col] - comparison_table[col+"_media"]
         comparison_table["Posição em relação à média"] = np.select(
             [comparison_table["Variação"].isna(), comparison_table["Variação"].gt(0), comparison_table["Variação"].lt(0)],
             ["Sem referência", "Acima", "Abaixo"], default="Igual",
         )
-        comparison_table = comparison_table.rename(columns={col:LABELS[col], col+"_media":"Média anterior"}).sort_values("data_hora",ascending=False)
+        comparison_table = comparison_table.rename(columns={col:LABELS[col], col+"_media":f"Média móvel das {window} leituras anteriores"}).sort_values("data_hora",ascending=False)
         table(comparison_table,width="stretch",hide_index=True)
         st.caption(f"A média usa até {window} leituras anteriores válidas deste dispositivo, com mínimo de 12, sem incluir a leitura da própria linha. A variação é o valor menos essa média, na unidade do indicador; não é percentual nem a variação entre atualizações dos cards. Valores ausentes não viram zero. Estar acima ou abaixo não indica risco ou funcionamento correto do sensor.")
         export(comparison_table,"analises_comparacao_media")
 with entries:
-    st.subheader("Qualidade dos Dados")
+    st.subheader("Qualidade e Disponibilidade dos Dados")
     with st.container(border=True):
         st.subheader("Conexão com o Banco de Dados")
         successful_reads = [result for result in source_results if result.issue is None and result.fetched_at is not None]
@@ -454,15 +457,16 @@ with entries:
         connection_columns[0].metric("Fontes consultadas com sucesso", f"{len(successful_reads)} de {len(source_results)}")
         last_read = latest_success_at(source_results)
         completed = last_read.astimezone(BRASILIA).strftime("%d/%m/%Y %H:%M:%S") if last_read else "Indisponível"
-        connection_columns[1].metric("Última atualização dos dados (Brasília)", completed)
-        st.caption("Sensores, previsões operacionais e validação histórica são consultados no mesmo ciclo, com cache de até 30 segundos. O horário indica o fim da última consulta bem-sucedida do ciclo. A data da leitura e a geração da previsão aparecem nas respectivas seções.")
-        st.markdown("#### Fontes Consultadas")
-        st.caption("São três conjuntos de dados no mesmo banco: sensores, previsões operacionais e avaliação histórica. Não são três bancos nem três sensores.")
-        for label, result in (("Sensores", sensor_result), ("Previsões operacionais", forecast_result), ("Avaliação histórica", historical_result)):
+        connection_columns[1].metric("Última consulta concluída (Brasília)", completed)
+        st.caption("Sensores, previsões operacionais e avaliação final de 2024 são consultados no mesmo ciclo, com cache de até 30 segundos. O horário indica o fim da última consulta bem-sucedida do ciclo. A data da leitura e a geração da previsão aparecem nas respectivas seções.")
+        st.markdown("#### Fontes consultadas")
+        st.caption("São três conjuntos de dados no mesmo banco: sensores, previsões operacionais e avaliação final de 2024. Não são três bancos nem três sensores.")
+        for label, result in (("Sensores", sensor_result), ("Previsões operacionais", forecast_result), ("Avaliação final 2024", historical_result)):
             if result.issue:
                 st.error(f"{label}: {result.issue.message}")
             else:
-                st.write(f"{label}: {len(result.frame)} registros • {result.elapsed_ms} ms")
+                suffix = " (limite da consulta)" if label == "Sensores" and len(result.frame) == 1000 else ""
+                st.write(f"{label}: {len(result.frame)} registros{suffix} • {result.elapsed_ms} ms")
                 if result.frame.empty:
                     st.info(f"{label}: consulta concluída sem registros visíveis para o usuário configurado.")
         if missing and not sensor_error:
@@ -489,8 +493,18 @@ with entries:
 
 
 with method:
-    st.subheader("Como interpretar")
-    st.subheader("Critério dos Pontos Vermelhos")
+    st.subheader("Metodologia e interpretação")
+    with st.expander("Modelo epidemiológico — desenho temporal e resultado", expanded=True):
+        st.markdown("""
+- **Alvo:** contagem semanal de casos confirmados de leptospirose de residentes de São Paulo, excluindo importados conhecidos.
+- **Fontes:** SINAN/DATASUS para casos e INMET A701 para variáveis meteorológicas. As leituras do protótipo IoT não foram usadas como atributos do modelo.
+- **Divisão temporal:** treino de 2010 a 2022, validação e seleção em 2023 e teste final bloqueado em 2024.
+- **Modelo selecionado:** regressão de Poisson regularizada (`alpha=1`). O XGBoost foi avaliado como challenger e não atingiu o ganho mínimo pré-definido de 5% para justificar maior complexidade.
+- **Teste final:** MAE de 1,368 caso/semana em `t+1` e 1,359 em `t+2`. Na visualização de `t+1`, o valor aparece arredondado para 1,37.
+- **Faixas exploratórias:** normal abaixo de 2; atenção de 2 a menos de 4; alerta a partir de 4 casos estimados. Não são alertas oficiais de saúde pública.
+        """)
+
+    st.subheader("Critério dos pontos vermelhos da telemetria")
     st.write("A mesma regra vale para os quatro sensores, separadamente: diferença entre leituras consecutivas, comparada à mediana e ao desvio absoluto mediano (MAD) das diferenças anteriores. Ponto vermelho quando |M| > 3,5. Referência padrão de 48 diferenças, mínimo de 12 válidas; a diferença atual fica fora da referência. Lacunas acima de 7min30s e horários duplicados não geram diferenças válidas. Com MAD zero ou histórico insuficiente, a avaliação fica indisponível.")
     st.write("Adaptação exploratória para mudanças temporais do escore modificado de Iglewicz–Hoaglin. Não é limite sanitário nem norma específica de sensores. Pequenas mudanças podem ser atípicas em séries muito estáveis; resolução, calibração e desempenho precisam de validação por sensor. Não detectar mudança não comprova normalidade.")
     st.markdown("Referências: [NIST — escore modificado e limiar 3,5](https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h.htm) e [USGS — monitoramento e calibração](https://pubs.usgs.gov/tm/2006/tm1D3/). A janela causal e a aplicação às diferenças são escolhas deste protótipo, ainda sem validação de sensibilidade e falsos positivos em campo.")
@@ -498,7 +512,7 @@ with method:
 
     with st.expander("Como relacionar telemetria e classificação"):
         st.write("A classificação destacada vem da execução mais recente da visão operacional disponível no banco. Sua data de referência é informada no farol. Os sensores descrevem a água no período escolhido e são analisados separadamente. Uma alteração no sensor não altera a classificação epidemiológica.")
-        st.caption("Chuva, mapa de localização e explicações de variáveis ainda não estão disponíveis nesta consulta.")
+        st.caption("A telemetria complementa a demonstração de IoT, mas permanece metodologicamente separada da inferência epidemiológica.")
 
     st.markdown("""
 - Cada indicador usa seu próprio histórico e sua própria escala. Não há comparação direta entre pH, turbidez, TDS e temperatura.
@@ -510,10 +524,10 @@ with method:
 - Horários de leitura, consulta e geração são exibidos em Brasília (UTC−03). Filtros e resumos diários de sensores seguem o calendário de Brasília. Datas de referência das previsões mantêm o dia informado pela fonte.
 - Integração visual não significa que os sensores diagnosticam leptospirose ou alimentaram o modelo histórico.
 - A visão operacional fornece estimativas do modelo Poisson, data de geração, semana-alvo e tipo de previsão. Resultados reconstruídos não são previsões produzidas no passado em tempo real.
-- A aba Validação histórica usa a tabela de avaliação anterior, sua série completa e indicadores com antecedência fixa de uma semana. Essa avaliação retrospectiva é separada das estimativas operacionais.
+- A aba Avaliação Final 2024 usa a tabela do holdout bloqueado, com antecedência fixa de uma semana. Essa avaliação retrospectiva é separada das estimativas operacionais.
 - Observados desta fonte são provisórios; quando ausentes, não há curva de observados nem métricas de comparação. Ausência não significa zero casos.
-- Chuva, localização e explicações da IA dependem de carregadores específicos ainda não fornecidos.
 - Falhas de carregamento não são substituídas por dados fictícios. Somente as linhas retornadas pelas consultas entram na análise.
 """)
-    st.latex(r"z_t=\frac{x_t-\mu_{\mathrm{anterior}}}{s_{\mathrm{anterior}}}")
+    st.latex(r"\Delta_t=x_t-x_{t-1}")
+    st.latex(r"M_t=0{,}6745\,\frac{\Delta_t-\operatorname{mediana}(\Delta_{\mathrm{anteriores}})}{\operatorname{MAD}(\Delta_{\mathrm{anteriores}})}")
 st.divider()

@@ -1,6 +1,6 @@
 # Dashboard WBE-IoT
 
-O frontend consulta PostgreSQL com seis abas de análise.
+O frontend consulta PostgreSQL com cinco abas de análise.
 Não utiliza dados fictícios como substituição em caso de erro.
 
 ## Iniciar com dois cliques
@@ -30,7 +30,7 @@ O indicador Atualizado às usa o horário de Brasília (UTC−03), apenas na exi
 Detalhes de falhas e formatos ficam em Qualidade dos dados → Diagnóstico das fontes.
 O botão Atualizar agora está em Atualização na lateral; o modo automático já vem ligado.
 As fontes consultadas são `public.leituras_sensor`, `public.tcc_previsoes_operacionais_dashboard`
-e `public.tcc_previsoes_epidemiologicas` (avaliação histórica).
+e `public.tcc_previsoes_epidemiologicas` (avaliação final de 2024).
 
 ## Leitura do painel
 
@@ -39,7 +39,7 @@ avaliação e conferência das previsões. Abaixo aparecem as últimas leituras 
 quatro sensores. Qualidade dos dados concentra preenchimento, lacunas e registros
 com desvios para evitar repetir indicadores em todas as abas.
 
-A aba **Validação histórica**, ao lado da Visão geral, recupera a última execução
+A aba **Avaliação Final 2024**, ao lado da Visão geral, recupera a última execução
 publicada na tabela histórica e exibe toda a série disponível, sem limitar às
 últimas 12 semanas. A antecedência é fixa em uma semana; não mistura execuções ou horizontes. MAE, RMSE, viés e número de semanas
 são calculados somente sobre pares de observado/estimado disponíveis. Observado
@@ -76,7 +76,9 @@ substituído por zero. Sem observados, o gráfico só exibe estimativas/limiares
 não apresenta MAE ou viés. Quando houver observados, a comparação e suas métricas
 são rotuladas como provisórias. Não são probabilidades nem métricas do holdout.
 Os gráficos usam as interações JavaScript nativas do Plotly para hover, zoom,
-legendas e guias de leitura. Datas seguem dd/mm/aaaa HH:mm:ss, em UTC.
+legendas e guias de leitura. Horários de telemetria seguem
+`dd/mm/aaaa HH:mm:ss` em Brasília (UTC−03); semanas epidemiológicas são datas de
+calendário, sem conversão de dia.
 
 O tema escuro é definido em `.streamlit/config.toml`; os componentes visuais
 ficam em `presentation.py` e `dashboard.css`. O dashboard só executa SELECT.

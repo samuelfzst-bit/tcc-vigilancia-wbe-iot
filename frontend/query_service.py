@@ -117,5 +117,5 @@ def update_status(results, *, invalid_contract=False):
     completed = latest.astimezone(BRASILIA)
     return f"Atualizado às {completed:%H:%M:%S}", "normal", (
         f"Ciclo de consultas concluído em {completed:%d/%m/%Y %H:%M:%S} (Brasília). "
-        "Inclui sensores, previsões operacionais e validação histórica."
+        "Inclui sensores, previsões operacionais e avaliação final de 2024."
     )

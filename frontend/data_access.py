@@ -78,7 +78,7 @@ def load_predictions(engine: Engine) -> pd.DataFrame:
 
 
 def load_historical_predictions(engine: Engine) -> pd.DataFrame:
-    """Toda a avaliação histórica da última execução, separada da fonte operacional."""
+    """Avaliação final de 2024 da última execução, separada da fonte operacional."""
     query = text(
         """
         with ultima_execucao as (

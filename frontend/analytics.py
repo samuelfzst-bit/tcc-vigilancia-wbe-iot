@@ -7,7 +7,12 @@ from numbers import Integral
 import numpy as np
 import pandas as pd
 
-LABELS = {"ph_value": "pH", "turbidity_value": "Turbidez", "tds_value": "TDS", "temperature_value": "Temperatura"}
+LABELS = {
+    "ph_value": "pH",
+    "turbidity_value": "Turbidez (leitura experimental)",
+    "tds_value": "TDS (leitura experimental)",
+    "temperature_value": "Temperatura (°C)",
+}
 MIN_HISTORY = 12
 AGGREGATIONS = {"Original": None, "5 minutos": "5min", "15 minutos": "15min", "30 minutos": "30min", "60 minutos": "60min"}
 GAP_TOLERANCE = pd.Timedelta(minutes=7, seconds=30)

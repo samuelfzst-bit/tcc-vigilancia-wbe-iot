@@ -1,26 +1,26 @@
-# 📓 Notebooks
+# Notebooks
 
-Jupyter Notebooks para Data Science e análise de dados.
+Ordem oficial:
 
-## Notebooks Disponíveis
+1. `01_extracao_e_auditoria.ipynb`: consulta a view privada, valida o contrato temporal e gera snapshot versionado.
+2. `02_modelagem_v2_colab.ipynb`: executa validação temporal, seleção de hiperparâmetros e sensibilidade sobre o snapshot aprovado.
+3. `03_xgboost_challenger_colab.ipynb`: compara Poisson e XGBoost com regra de substituição pré-registrada, sem abrir 2024.
+4. `04_avaliacao_final_2024_colab.ipynb`: congela o protocolo e, após confirmação explícita, abre 2024 uma única vez para o teste final.
+5. `05_analise_pos_hoc_2024_colab.ipynb`: audita erros, limiares e coeficientes depois do teste, sem retreinar ou substituir o modelo congelado.
 
-### `01_exploracao_dados.ipynb`
-Notebook completo para:
-- ✅ Exploração dos dados SINAN e INMET
-- 🧹 Limpeza e tratamento de valores ausentes
-- 📊 Normalização e padronização
-- 🔗 Merge dos datasets
-- 📈 Análise exploratória (EDA)
-- 💾 Exportação dos dados processados
+O treino v2 usa `scripts/train_models_v2.py`. O script não possui opção para abrir
+o teste de 2024 e salva os resultados em `MyDrive/TCC/model_runs_v2`.
 
-**Como executar:**
-```bash
-jupyter notebook 01_exploracao_dados.ipynb
-```
+O challenger usa `scripts/run_xgboost_challenger.py` e salva os resultados em
+`MyDrive/TCC/xgboost_challenger`. Ele também não possui rotina para abrir 2024.
 
-## 🚀 Próximos Passos
+A avaliação final usa `scripts/run_final_evaluation.py` em duas fases e salva
+os resultados em `MyDrive/TCC/final_evaluation`. A primeira fase grava o
+manifesto pré-teste; a segunda exige a confirmação literal definida no
+notebook e registra um recibo persistente para impedir reexecução do holdout.
 
-Adicionar notebooks para:
-- Análise de séries temporais
-- Modelagem preditiva
-- Validação de índice WBE
+A análise pós-hoc usa `scripts/analyze_posthoc_2024.py`. Seus resultados são
+descritivos: o limiar de 4 permanece oficial e a faixa de atenção iniciada em
+2 casos existe somente como camada operacional exploratória do dashboard.
+
+O notebook anterior foi preservado em `archive/` apenas para rastreabilidade. Ele não deve ser usado porque antecede as decisões atuais de cenário, disponibilidade e split.

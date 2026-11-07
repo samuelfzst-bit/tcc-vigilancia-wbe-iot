@@ -86,16 +86,18 @@ def test_dashboard_renders_without_database(monkeypatch, empty):
         assert "29/10/2026 21:35:08" in " ".join(m.value for m in app.markdown)
         assert ">8,25<" in " ".join(m.value for m in app.markdown)
         freshness = next(m.value for m in app.markdown if "Atualizado às" in m.value)
-        completed = next(m.value for m in app.metric if m.label == "Última atualização dos dados (Brasília)")
+        completed = next(m.value for m in app.metric if m.label == "Última consulta concluída (Brasília)")
         assert completed in freshness
         comparison = app.tabs[2].dataframe[0].value
         assert comparison["data_hora"].iloc[0] == pd.Timestamp("2026-10-29 21:35:08")
         chart_specs = [json.loads(chart.proto.spec) for chart in app.get("plotly_chart")]
         daily = next(spec for spec in chart_specs if spec["layout"].get("xaxis", {}).get("title", {}).get("text") == "Dia (Brasília)")
         assert daily["data"][0]["x"][-1].startswith("2026-10-29T00:00:00")
+        sensor_chart = next(spec for spec in chart_specs if any(trace.get("name") == "pH" for trace in spec["data"]))
+        assert sensor_chart["data"][0]["x"][-1].startswith("2026-10-29T21:35:08")
 
         assert not any(control.key == "quality_daily_indicator" for control in app.selectbox)
-        assert any(heading.value == "Análises e Comparação com a Média" for heading in app.tabs[2].subheader)
+        assert any(heading.value == "Leituras e comparação com a média móvel" for heading in app.tabs[2].subheader)
         assert not any(tab.label == "Evolução e alterações" for tab in app.tabs)
         window = next(control for control in app.slider if control.label == "Registros anteriores")
         window.set_value(12).run(timeout=45)
@@ -193,10 +195,10 @@ def test_historical_validation_keeps_full_timeline_separate_from_operational(mon
     monkeypatch.setattr(data_access, "load_historical_predictions", historical_loader)
     app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "frontend/app.py")).run(timeout=45)
     assert not app.exception
-    assert [tab.label for tab in app.tabs][:2] == ["Visão geral", "Validação Histórica"]
+    assert [tab.label for tab in app.tabs][:2] == ["Visão geral", "Avaliação Final 2024"]
     assert "Semana prevista: 04/10/2026" in " ".join(m.value for m in app.markdown)
     if unavailable:
-        assert any("Avaliação histórica indisponível" in warning.value for warning in app.warning)
+        assert any("Avaliação final de 2024 indisponível" in warning.value for warning in app.warning)
         assert len(app.get("plotly_chart")) == 1
         return
     def historical_figure():
