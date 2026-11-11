@@ -66,7 +66,15 @@ def test_dashboard_renders_without_database(monkeypatch, empty):
     monkeypatch.setattr(data_access, "load_historical_predictions", lambda engine: pd.DataFrame(columns=["horizonte", "inicio_semana_alvo", "observado", "previsto", "nivel_previsto", "limiar_atencao", "limiar_alerta"]))
     app = AppTest.from_file(str(root / "frontend/app.py")).run(timeout=45)
     assert not app.exception
-    assert len(app.tabs) == 5
+    assert len(app.tabs) == 6
+    assert [tab.label for tab in app.tabs] == [
+        "Visão geral",
+        "Avaliação Final 2024",
+        "Sensor Individual",
+        "IA dos Sensores",
+        "Qualidade e Disponibilidade",
+        "Metodologia",
+    ]
     markup = " ".join(m.value for m in app.markdown)
     assert "Sem resultado disponível" in markup if empty else "Atenção" in markup
     assert not any(r.label == "Horizonte da resposta da IA" for r in app.radio)

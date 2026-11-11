@@ -23,12 +23,12 @@ git clone https://github.com/samuelfzst-bit/tcc-vigilancia-wbe-iot.git
 cd tcc-vigilancia-wbe-iot
 ```
 
-Para homologar a entrega final antes do merge na `main`:
+Para homologar a versão com IA dos sensores sem alterar a versão estável:
 
 ```bash
 git fetch origin
-git switch integration/tcc-final
-git pull origin integration/tcc-final
+git switch feature/iot-anomaly-ai
+git pull origin feature/iot-anomaly-ai
 ```
 
 ## 2. Criar o ambiente virtual
@@ -104,13 +104,14 @@ O arquivo de segredo não pode aparecer na saída.
 python -m streamlit run frontend/app.py
 ```
 
-Acesse `http://localhost:8501`. Valide as cinco abas:
+Acesse `http://localhost:8501`. Valide as seis abas:
 
 1. visão operacional em `t+1`;
 2. avaliação final do holdout de 2024;
 3. análise individual da telemetria;
-4. qualidade e disponibilidade das fontes;
-5. metodologia e limitações.
+4. IA dos Sensores, incluindo escore, sinalizações e limitações;
+5. qualidade e disponibilidade das fontes;
+6. metodologia e limitações.
 
 Para encerrar, volte ao terminal e pressione `Ctrl+C`.
 
@@ -153,5 +154,5 @@ python -m streamlit run frontend/app.py
 - O módulo IoT mostra leituras físicas armazenadas no Supabase.
 - Os sensores não diagnosticam leptospirose e não alimentaram o modelo
   epidemiológico histórico.
-- A tela consulta o banco a cada 30 segundos; isso não executa novo treinamento
-  nem nova inferência.
+- A tela consulta o banco a cada 30 segundos e aplica a inferência da IA dos
+  sensores em memória. Isso não executa novo treinamento nem grava no banco.

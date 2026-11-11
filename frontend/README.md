@@ -1,6 +1,6 @@
 # Dashboard WBE-IoT
 
-O frontend consulta PostgreSQL com cinco abas de análise.
+O frontend consulta PostgreSQL com seis abas de análise.
 Não utiliza dados fictícios como substituição em caso de erro.
 
 ## Iniciar com dois cliques
@@ -47,6 +47,13 @@ zero é válido. Não há porcentagem de acurácia inventada nem promessa de des
 futuro. A indisponibilidade dessa fonte é indicada sem substituir o gráfico
 operacional por resultados históricos.
 
+A aba **IA dos Sensores** aplica localmente um artefato versionado de Isolation
+Forest às mudanças consecutivas de pH, turbidez, TDS e temperatura. A consulta
+ao Supabase continua somente leitura. O resultado identifica comportamento
+multivariado incomum em relação ao histórico do protótipo; não é diagnóstico,
+limite sanitário ou previsão epidemiológica. A tela apresenta a validação temporal,
+os testes sintéticos e suas limitações sem transformar taxa sinalizada em acurácia.
+
 A atualização automática vem ligada e consulta novamente a cada 30 segundos
 com a sessão aberta. O botão Atualizar agora permite atualizar imediatamente. O timer usa o TTL
 compartilhado das leituras e não limpa o cache de todas as sessões.
@@ -67,8 +74,10 @@ Previsões ausentes ou inconsistentes não aparecem como normais. A publicação
 detalhes do período avaliado aparecem no ícone de informação, acessível
 também pelo teclado. A geração aparece em horário de Brasília; a semana-alvo
 continua como data de referência. Resultados reconstruídos têm identificação
-própria, sem rótulo de avaliação final de 2024. Consultar em tempo real não
-executa treinamento ou inferência: novas previsões devem existir no banco.
+própria, sem rótulo de avaliação final de 2024. Consultar em tempo real não treina
+novamente nenhum modelo. As previsões epidemiológicas devem existir no banco; a
+inferência da IA dos sensores é aplicada em memória sobre as leituras retornadas,
+sem persistência.
 
 O campo `observado_provisorio` é consumido como observado na interface, mantendo
 `status_observado`. Quando o status é indisponível ou o valor está ausente, não é
@@ -105,7 +114,7 @@ prazo de execução ao SELECT. A configuração de statement_timeout depende do 
 restrito do banco e não foi alterada. Ao trocar DSN/credenciais no arquivo local,
 reinicie o aplicativo para recriar o engine.
 
-A refatoração passou por revisão de fonte, Ruff e 46 testes com fixtures em
+A refatoração passou por revisão de fonte, Ruff e testes com fixtures em
 contêiner offline, sem segredos ou banco real. Os limites e as pendências de
 homologação estão em `docs/REVISAO_DASHBOARD_2026-11-01.md`.
 

@@ -30,6 +30,7 @@ from frontend.query_service import (
     BRASILIA, REFRESH_SECONDS, ConfigurationError, execute_read, latest_success_at, load_local_secrets,
     refresh_due, update_status,
 )
+from frontend.sensor_ai import load_sensor_ai_bundle, run_sensor_ai, summarize_sensor_ai
 apply_style()
 
 @st.cache_resource(show_spinner=False)
@@ -41,6 +42,11 @@ def get_engine():
     except RuntimeError:
         raise ConfigurationError("Configuração de acesso ausente ou inválida.") from None
     return access.build_engine(url)
+
+
+@st.cache_resource(show_spinner=False)
+def get_sensor_ai_bundle():
+    return load_sensor_ai_bundle()
 
 
 @st.cache_data(ttl=REFRESH_SECONDS, max_entries=1, show_spinner=False)
@@ -223,6 +229,9 @@ with st.sidebar:
 
 selected=sensors.loc[sensors["device_id"].astype(str).eq(chosen)].copy() if chosen else sensors.iloc[0:0].copy()
 filtered=selected.iloc[0:0].copy()
+sensor_ai_scored=selected.iloc[0:0].copy()
+sensor_ai_filtered=selected.iloc[0:0].copy()
+sensor_ai_error=None
 if not selected.empty:
     selected=analyze(selected,window,threshold)
     with st.sidebar:
@@ -241,10 +250,24 @@ if not selected.empty:
         days = 1 if recent_period == "Últimas 24h disponíveis" else 7
         filtered=selected.loc[selected["data_hora"].ge(latest_stamp-pd.Timedelta(days=days))].copy()
 
+    try:
+        sensor_ai_scored = run_sensor_ai(get_sensor_ai_bundle(), selected)
+        sensor_ai_scored["data_hora"] = pd.to_datetime(
+            sensor_ai_scored["data_hora"], utc=True
+        ).dt.tz_convert(BRASILIA)
+        if not filtered.empty:
+            sensor_ai_filtered = sensor_ai_scored.loc[
+                sensor_ai_scored["data_hora"].ge(filtered["data_hora"].min())
+                & sensor_ai_scored["data_hora"].le(filtered["data_hora"].max())
+            ].copy()
+    except Exception as exc:
+        sensor_ai_error = str(exc)
+
 forecast_frame = latest_forecast_series(p)
 
-home,validation,detail,entries,method=st.tabs([
-    "Visão geral", "Avaliação Final 2024", "Sensor Individual", "Qualidade e Disponibilidade", "Metodologia"
+home,validation,detail,sensor_ai_tab,entries,method=st.tabs([
+    "Visão geral", "Avaliação Final 2024", "Sensor Individual", "IA dos Sensores",
+    "Qualidade e Disponibilidade", "Metodologia"
 ])
 with home:
     st.subheader("Panorama epidemiológico", help="A classificação usa a última execução da visão operacional. A geração é a data em que o modelo produziu o resultado; a semana-alvo é o período estimado. Previsões reconstruídas e observados provisórios são identificados, sem substituição de ausentes por zero.")
@@ -442,6 +465,90 @@ with detail:
         table(comparison_table,width="stretch",hide_index=True)
         st.caption(f"A média usa até {window} leituras anteriores válidas deste dispositivo, com mínimo de 12, sem incluir a leitura da própria linha. A variação é o valor menos essa média, na unidade do indicador; não é percentual nem a variação entre atualizações dos cards. Valores ausentes não viram zero. Estar acima ou abaixo não indica risco ou funcionamento correto do sensor.")
         export(comparison_table,"analises_comparacao_media")
+
+
+with sensor_ai_tab:
+    st.subheader("IA dos Sensores — detecção multivariada exploratória")
+    st.caption(
+        "O Isolation Forest recebe diretamente as mudanças entre leituras de pH, "
+        "turbidez, TDS e temperatura. Ele identifica padrões incomuns em relação ao "
+        "histórico do protótipo; não diagnostica leptospirose, contaminação ou qualidade da água."
+    )
+    if sensor_ai_error:
+        st.error("A inferência dos sensores está indisponível. " + sensor_ai_error)
+    elif sensor_ai_filtered.empty:
+        st.info("Não há leituras suficientes no período selecionado para executar a IA.")
+    else:
+        ai_summary = summarize_sensor_ai(sensor_ai_filtered)
+        if ai_summary is None:
+            st.info("Nenhuma leitura elegível: a primeira leitura de cada sequência e leituras após lacunas não recebem classificação.")
+        else:
+            latest_label = "Alteração multivariada incomum" if ai_summary["latest_is_anomaly"] else "Comportamento compatível com o histórico"
+            latest_tone = "warning" if ai_summary["latest_is_anomaly"] else "success"
+            getattr(st, latest_tone)(
+                f"Última inferência: {latest_label}. "
+                f"Maior mudança absoluta: {LABELS.get(ai_summary['latest_change'], ai_summary['latest_change'])}."
+            )
+            c1,c2,c3,c4=st.columns(4)
+            c1.metric("Leituras analisadas", str(ai_summary["eligible"]), help="Somente pares consecutivos do mesmo dispositivo, sem duplicidade e com intervalo de até 7min30s.")
+            c2.metric("Alterações sinalizadas", str(ai_summary["anomalies"]), help="Sinalizações exploratórias do modelo; não são alertas sanitários.")
+            c3.metric("Taxa sinalizada no recorte", value(100*ai_summary["flag_rate"], "%"), help="Percentual descritivo do período selecionado; não é acurácia.")
+            c4.metric("Escore da última leitura", value(ai_summary["latest_score"]), help="Valores acima de zero ultrapassam a fronteira aprendida pelo Isolation Forest; quanto maior, mais atípico para a referência.")
+
+            eligible_ai = sensor_ai_filtered.loc[sensor_ai_filtered["anomaly_score"].notna()].copy()
+            anomalies_ai = eligible_ai.loc[eligible_ai["is_anomaly"].eq(True)]
+            fig=go.Figure()
+            fig.add_trace(go.Scatter(
+                x=eligible_ai["data_hora"], y=eligible_ai["anomaly_score"],
+                name="Escore de anomalia", mode="lines", line=dict(color="#67c5da",width=2),
+                connectgaps=False,
+            ))
+            fig.add_hline(y=0,line_color="#f59e0b",line_dash="dash",annotation_text="Fronteira do modelo")
+            fig.add_trace(go.Scatter(
+                x=anomalies_ai["data_hora"], y=anomalies_ai["anomaly_score"],
+                name="Alteração incomum", mode="markers", marker=dict(color="#ef4444",size=8),
+            ))
+            fig.update_layout(
+                title="Escore multivariado ao longo do tempo", xaxis_title="Horário (Brasília)",
+                yaxis_title="Escore de anomalia", hovermode="x unified", height=470,
+            )
+            show(fig)
+
+            with st.expander("Validação e limitações do modelo", expanded=True):
+                metadata = get_sensor_ai_bundle()["metadata"]
+                st.write(
+                    f"A referência contém **{metadata['reference_rows']} mudanças reais válidas**. "
+                    f"Na divisão temporal, {metadata['training_rows_evaluation']} foram usadas no ajuste "
+                    f"e {metadata['validation_rows']} na validação posterior."
+                )
+                st.write(
+                    f"Na validação temporal, **{100*metadata['natural_validation_flag_rate']:.1f}%** das mudanças "
+                    "foram sinalizadas. Em perturbações sintéticas simultâneas nos quatro indicadores, "
+                    f"a sensibilidade exploratória foi de **{100*metadata['synthetic_sensitivity']['multivariada']:.1f}%**."
+                )
+                sensitivity = pd.DataFrame({
+                    "Cenário sintético": ["pH", "Turbidez", "TDS", "Temperatura", "Multivariado"],
+                    "Sensibilidade": [
+                        100*metadata["synthetic_sensitivity"]["ph_value"],
+                        100*metadata["synthetic_sensitivity"]["turbidity_value"],
+                        100*metadata["synthetic_sensitivity"]["tds_value"],
+                        100*metadata["synthetic_sensitivity"]["temperature_value"],
+                        100*metadata["synthetic_sensitivity"]["multivariada"],
+                    ],
+                })
+                st.dataframe(sensitivity, hide_index=True, width="stretch", column_config={
+                    "Sensibilidade": st.column_config.ProgressColumn(format="%.1f%%", min_value=0, max_value=100)
+                })
+                st.caption("As perturbações são testes artificiais de sensibilidade, não rótulos de eventos reais. A sensibilidade por sensor varia — especialmente para TDS — e permanece uma limitação explícita. Sem rótulos de campo, não calculamos acurácia, precisão, recall ou F1 clínico/sanitário.")
+
+            output_columns = [
+                "data_hora", *LABELS, "delta_ph_value", "delta_turbidity_value",
+                "delta_tds_value", "delta_temperature_value", "anomaly_score",
+                "classificacao_ia", "maior_mudanca", "model_version",
+            ]
+            with st.expander("Conferir inferências • mais recentes primeiro"):
+                table(sensor_ai_filtered.reindex(columns=output_columns),width="stretch",hide_index=True)
+                export(sensor_ai_filtered.reindex(columns=output_columns),"inferencia_ia_sensores")
 with entries:
     st.subheader("Qualidade e Disponibilidade dos Dados")
     with st.container(border=True):
@@ -511,8 +618,18 @@ with method:
 
 
     with st.expander("Como relacionar telemetria e classificação"):
-        st.write("A classificação destacada vem da execução mais recente da visão operacional disponível no banco. Sua data de referência é informada no farol. Os sensores descrevem a água no período escolhido e são analisados separadamente. Uma alteração no sensor não altera a classificação epidemiológica.")
-        st.caption("A telemetria complementa a demonstração de IoT, mas permanece metodologicamente separada da inferência epidemiológica.")
+        st.write("A classificação epidemiológica vem da execução do Poisson e não recebe leituras do ESP32. Em paralelo, a aba IA dos Sensores aplica um Isolation Forest diretamente às mudanças de pH, turbidez, TDS e temperatura. Uma alteração no sensor não muda a classificação epidemiológica.")
+        st.caption("A integração IoT → IA existe no detector multivariado da telemetria. Os dois modelos permanecem separados porque respondem a perguntas e usam escalas temporais diferentes.")
+
+    with st.expander("IA dos Sensores — desenho e validação", expanded=True):
+        st.markdown("""
+- **Objetivo:** detectar mudanças multivariadas incomuns na telemetria real do ESP32.
+- **Algoritmo:** Isolation Forest com 400 árvores, `contamination=0,01` e semente fixa.
+- **Entradas:** diferenças causais entre leituras consecutivas de pH, turbidez, TDS e temperatura.
+- **Barreiras:** não cruza dispositivos, horários duplicados ou lacunas acima de 7min30s; a leitura atual não participa do treino durante a inferência.
+- **Validação:** divisão temporal 80/20 da referência e perturbações sintéticas declaradas. O artefato final foi reajustado em toda a referência anterior a 04/11/2026.
+- **Limite:** não há rótulos de contaminação ou eventos sanitários. Portanto, o resultado é anomalia de padrão, não diagnóstico, risco ou alerta de saúde pública.
+        """)
 
     st.markdown("""
 - Cada indicador usa seu próprio histórico e sua própria escala. Não há comparação direta entre pH, turbidez, TDS e temperatura.
@@ -523,6 +640,7 @@ with method:
 - A referência é calculada antes do filtro de datas, usando o histórico retornado pelo backend.
 - Horários de leitura, consulta e geração são exibidos em Brasília (UTC−03). Filtros e resumos diários de sensores seguem o calendário de Brasília. Datas de referência das previsões mantêm o dia informado pela fonte.
 - Integração visual não significa que os sensores diagnosticam leptospirose ou alimentaram o modelo histórico.
+- A IA dos sensores recebe a telemetria diretamente, mas seu resultado é separado do Poisson e não altera as previsões epidemiológicas.
 - A visão operacional fornece estimativas do modelo Poisson, data de geração, semana-alvo e tipo de previsão. Resultados reconstruídos não são previsões produzidas no passado em tempo real.
 - A aba Avaliação Final 2024 usa a tabela do holdout bloqueado, com antecedência fixa de uma semana. Essa avaliação retrospectiva é separada das estimativas operacionais.
 - Observados desta fonte são provisórios; quando ausentes, não há curva de observados nem métricas de comparação. Ausência não significa zero casos.

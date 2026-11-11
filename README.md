@@ -12,7 +12,7 @@ Protótipo de TCC para antecipação semanal do risco de leptospirose em São Pa
 - Divisão temporal fixa: treino até 2022, validação em 2023 e teste final em 2024.
 - Banco oficial do projeto: Supabase/PostgreSQL.
 
-O IoT é uma camada física real de aquisição e transmissão. Como ainda não existe uma série histórica longitudinal dos sensores compatível com o SINAN/INMET, suas leituras não serão usadas para treinar o modelo epidemiológico histórico. As camadas são integradas na aplicação, mas avaliadas separadamente.
+O IoT é uma camada física real de aquisição e transmissão. Como ainda não existe uma série histórica longitudinal dos sensores compatível com o SINAN/INMET, suas leituras não foram usadas para treinar o modelo epidemiológico histórico. Em paralelo, a telemetria real alimenta uma segunda IA exploratória, baseada em Isolation Forest, que detecta mudanças multivariadas incomuns entre leituras consecutivas. Ela não diagnostica leptospirose, contaminação ou qualidade da água. As duas IAs são integradas na aplicação, mas avaliadas separadamente.
 
 ## Estrutura
 
@@ -23,7 +23,7 @@ sql/             views privadas de clima e modelagem no Supabase
 tests/           testes automáticos de qualidade e antileakage
 iot_simulator/   publicação MQTT e apoio à validação do hardware
 docs/            decisões e documentação metodológica
-artifacts/       convenção para métricas e modelos, sem binários no Git
+artifacts/       métricas e artefatos versionados usados na inferência
 ```
 
 ## Começo rápido
@@ -67,7 +67,10 @@ para comprovar desempenho, e a **visão operacional**, que apresenta estimativas
 semanais publicadas na view `tcc_previsoes_operacionais_dashboard`. Resultados
 marcados como reconstruídos foram gerados posteriormente com os dados disponíveis
 na execução; não devem ser apresentados como previsões emitidas em tempo real no
-passado. A telemetria IoT permanece um módulo físico separado do modelo.
+passado. A telemetria IoT permanece separada do Poisson, mas alimenta diretamente
+a aba **IA dos Sensores**. O detector multivariado executa inferência a partir de
+`leituras_sensor`, sem gravar resultados no banco. Consulte
+`docs/metodologia/IA_SENSORES.md` para desenho, métricas e limitações.
 
 Para publicação, use Streamlit Community Cloud com `frontend/app.py`, a branch de
 homologação e o segredo `TCC_DB_URL` configurado na plataforma. Consulte
@@ -82,6 +85,6 @@ homologação e o segredo `TCC_DB_URL` configurado na plataforma. Consulte
 
 ## Segurança e dados
 
-Credenciais ficam apenas em variáveis de ambiente ou no gerenciador de segredos do Colab. Microdados do SINAN, snapshots Parquet e modelos treinados não devem ser versionados.
+Credenciais ficam apenas em variáveis de ambiente ou no gerenciador de segredos do Colab. Microdados do SINAN e snapshots Parquet não devem ser versionados. A única exceção de modelo é o artefato pequeno e auditado da IA dos sensores, necessário para a inferência do dashboard.
 
 Este repositório faz parte de um Trabalho de Conclusão de Curso.

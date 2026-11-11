@@ -11,6 +11,10 @@ artifacts/models/
 artifacts/snapshots/
 artifacts/runs/
 
+# Artefato pequeno e versionado usado pela inferência do dashboard.
+!artifacts/sensor_anomaly/
+!artifacts/sensor_anomaly/isolation_forest_v1.joblib
+
 # Python
 __pycache__/
 *.py[cod]

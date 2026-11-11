@@ -1,6 +1,6 @@
 # Arquitetura híbrida
 
-O sistema mantém três módulos explicitamente separados. Isso evita alegar que o sensor mede diretamente leptospirose ou que dados simulados representam evidência epidemiológica.
+O sistema mantém quatro módulos explicitamente separados. Isso evita alegar que o sensor mede diretamente leptospirose ou que dados simulados representam evidência epidemiológica.
 
 ## 1. Camada histórica de modelagem
 
@@ -8,15 +8,23 @@ SINAN e INMET são tratados e relacionados no Supabase. A view privada `tcc_priv
 
 ## 2. Camada física IoT
 
-O dispositivo mede parâmetros físico-químicos, envia mensagens via internet/MQTT e comprova a integração obrigatória com hardware. Essa camada é validada por conectividade, integridade da mensagem, latência e estabilidade. Até haver dados reais suficientes, as leituras servem ao monitoramento operacional e não entram no treino histórico.
+O dispositivo mede parâmetros físico-químicos, envia mensagens via internet/MQTT e comprova a integração obrigatória com hardware. Essa camada é validada por conectividade, integridade da mensagem, latência e estabilidade. As leituras servem ao monitoramento operacional e não entram no treino histórico epidemiológico.
 
-## 3. Aplicação integrada
+## 3. IA exploratória dos sensores
+
+As mudanças consecutivas de pH, turbidez, TDS e temperatura alimentam um
+Isolation Forest multivariado. A inferência é causal, não cruza dispositivos,
+duplicatas ou lacunas acima de 7min30s e usa um artefato versionado. Seu resultado
+é uma sinalização de comportamento incomum, sem significado sanitário.
+
+## 4. Aplicação integrada
 
 O backend e o dashboard apresentam lado a lado:
 
 - risco epidemiológico previsto pelo modelo histórico;
 - condições ambientais e meteorológicas;
 - telemetria atual do protótipo IoT;
+- sinalizações exploratórias da IA dos sensores;
 - data de atualização, origem e limitações de cada indicador.
 
 ## Bancos e fluxos
@@ -30,8 +38,10 @@ flowchart TD
     C --> D["Tabelas de previsões"]
     E["ESP32 e sensores"] --> F["EMQX via MQTT/TLS"]
     F --> G["leituras_sensor no Supabase"]
+    G --> I["Isolation Forest dos sensores"]
     D --> H["Dashboard Streamlit"]
     G --> H
+    I --> H
 ```
 
 O dashboard não treina o modelo a cada atualização. Ele executa consultas de
@@ -39,7 +49,9 @@ somente leitura sobre `tcc_previsoes_operacionais_dashboard`,
 `tcc_previsoes_epidemiologicas` e `leituras_sensor`. A primeira fonte alimenta a
 visão operacional, a segunda preserva a avaliação final de 2024 e a terceira
 recebe a telemetria física. Essa integração ocorre na apresentação e no banco;
-não transforma os sensores em atributos epidemiológicos.
+não transforma os sensores em atributos epidemiológicos. O dashboard aplica o
+artefato do Isolation Forest em memória sobre a telemetria retornada; não grava
+inferências e não requer tabela adicional no Supabase.
 
 ## Barreiras contra leakage
 
@@ -53,4 +65,7 @@ não transforma os sensores em atributos epidemiológicos.
 
 ## Próxima evolução
 
-Somente após acumular telemetria real com cobertura e duração adequadas será testado um modelo exploratório que incorpore sensores. Esse experimento deve ser relatado como extensão, não como substituto da validação histórica.
+Com uma série de campo mais longa e eventos rotulados, a IA dos sensores poderá
+ser reavaliada com métricas supervisionadas, calibração por sensor e validação de
+falsos positivos. Até lá, permanece exploratória e não substitui a validação
+histórica do Poisson.

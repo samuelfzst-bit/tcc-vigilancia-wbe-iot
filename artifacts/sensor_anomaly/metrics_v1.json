@@ -1,0 +1,41 @@
+{
+  "model_version": "sensor_iforest_delta_v1_20261111",
+  "algorithm": "IsolationForest",
+  "feature_columns": [
+    "delta_ph_value",
+    "delta_turbidity_value",
+    "delta_tds_value",
+    "delta_temperature_value"
+  ],
+  "sensor_columns": [
+    "ph_value",
+    "turbidity_value",
+    "tds_value",
+    "temperature_value"
+  ],
+  "reference_end": "2026-11-04T00:00:00+00:00",
+  "reference_rows": 1263,
+  "training_rows_evaluation": 1010,
+  "validation_rows": 253,
+  "train_fraction": 0.8,
+  "contamination": 0.01,
+  "random_state": 20261111,
+  "validation_start": "2026-10-08T03:52:24+00:00",
+  "validation_end": "2026-10-10T21:35:25+00:00",
+  "natural_validation_flag_rate": 0.05138339920948617,
+  "synthetic_sensitivity": {
+    "ph_value": 0.4308300395256917,
+    "turbidity_value": 0.7035573122529645,
+    "tds_value": 0.09090909090909091,
+    "temperature_value": 0.5138339920948617,
+    "multivariada": 1.0
+  },
+  "synthetic_perturbations": {
+    "ph_value": 3.0,
+    "turbidity_value": 40.0,
+    "tds_value": 50.0,
+    "temperature_value": 4.0
+  },
+  "created_at": "2026-11-11T16:11:10.390114+00:00",
+  "scope": "mudancas multivariadas na telemetria; sem significado sanitario"
+}
