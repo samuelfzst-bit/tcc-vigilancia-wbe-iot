@@ -1,0 +1,24 @@
+{
+  "model_version": "sensor_iforest_delta_v1_20261111",
+  "evaluation_type": "temporal_holdout_with_synthetic_perturbations",
+  "reference_rows": 1263,
+  "training_rows": 1010,
+  "validation_rows": 253,
+  "training_end": "2026-10-08T03:52:21+00:00",
+  "validation_start": "2026-10-08T03:52:24+00:00",
+  "validation_end": "2026-10-10T21:35:25+00:00",
+  "natural_flag_rate": 0.05138339920948617,
+  "criteria_passed": 5,
+  "criteria_total": 7,
+  "criteria": [
+    {"name": "natural_flag_rate_lte_10pct", "observed": 0.05138339920948617, "target": 0.10, "passed": true},
+    {"name": "moderate_multivariate_gte_70pct", "observed": 1.0, "target": 0.70, "passed": true},
+    {"name": "strong_multivariate_gte_90pct", "observed": 1.0, "target": 0.90, "passed": true},
+    {"name": "strong_ph_gte_50pct", "observed": 0.4308300395256917, "target": 0.50, "passed": false},
+    {"name": "strong_turbidity_gte_50pct", "observed": 0.7035573122529645, "target": 0.50, "passed": true},
+    {"name": "strong_tds_gte_50pct", "observed": 0.09090909090909091, "target": 0.50, "passed": false},
+    {"name": "strong_temperature_gte_50pct", "observed": 0.5138339920948617, "target": 0.50, "passed": true}
+  ],
+  "decision": "exploratory_only_pending_ph_tds_review_and_controlled_physical_test",
+  "interpretation": "These are technical sensitivity tests, not sanitary performance metrics."
+}

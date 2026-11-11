@@ -540,6 +540,7 @@ with sensor_ai_tab:
                     "Sensibilidade": st.column_config.ProgressColumn(format="%.1f%%", min_value=0, max_value=100)
                 })
                 st.caption("As perturbações são testes artificiais de sensibilidade, não rótulos de eventos reais. A sensibilidade por sensor varia — especialmente para TDS — e permanece uma limitação explícita. Sem rótulos de campo, não calculamos acurácia, precisão, recall ou F1 clínico/sanitário.")
+                st.warning("Na grade ampliada com critérios definidos antes da execução, o modelo passou em 5 de 7 critérios. pH forte atingiu 43,08% e TDS forte 9,09%, abaixo da meta de 50%. A versão permanece exploratória até comparação com uma candidata e ensaio físico controlado.")
 
             output_columns = [
                 "data_hora", *LABELS, "delta_ph_value", "delta_turbidity_value",

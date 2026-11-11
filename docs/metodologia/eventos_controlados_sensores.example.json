@@ -1,0 +1,11 @@
+[
+  {
+    "event_id": "E01",
+    "start_at": "2026-11-15T14:00:00-03:00",
+    "end_at": "2026-11-15T14:10:00-03:00",
+    "expected_sensor": "tds_value",
+    "description": "Substituir pela intervenção realizada",
+    "external_reference": "Substituir pelo valor do instrumento de referência",
+    "notes": "Não inserir credenciais ou dados pessoais"
+  }
+]

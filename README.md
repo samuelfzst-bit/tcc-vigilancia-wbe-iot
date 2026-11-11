@@ -43,6 +43,12 @@ acadêmico e não constitui um alerta oficial de saúde pública.
 Consulte `docs/metodologia/AVALIACAO_FINAL_2024.md` e
 `docs/metodologia/ANALISE_POS_HOC_2024.md` para resultados e limitações.
 
+A validação reproduzível da IA dos sensores está em
+`notebooks/04_validacao_ia_sensores.ipynb`. O protocolo, os critérios definidos
+previamente e o resultado da primeira execução ficam em
+`docs/metodologia/PROTOCOLO_VALIDACAO_IA_SENSORES.md` e
+`docs/metodologia/RESULTADO_VALIDACAO_OFFLINE_IA_SENSORES.md`.
+
 ## Executar o dashboard
 
 O dashboard integrado usa Streamlit e consulta somente as tabelas autorizadas

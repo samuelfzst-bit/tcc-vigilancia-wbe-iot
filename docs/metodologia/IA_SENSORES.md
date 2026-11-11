@@ -82,3 +82,11 @@ O dashboard consulta `leituras_sensor` com um usuário PostgreSQL somente leitur
 carrega o artefato versionado e executa a inferência em memória. Nenhuma nova
 tabela foi criada e nenhum resultado é gravado no Supabase. Essa decisão reduz o
 risco operacional e preserva o fluxo já validado do protótipo.
+
+## Estado da validação
+
+A grade ampliada de perturbações e os critérios pré-definidos estão documentados
+em `PROTOCOLO_VALIDACAO_IA_SENSORES.md`. A primeira execução passou em 5 de 7
+critérios: pH e TDS não atingiram a meta isolada de 50%. O resultado completo está
+em `RESULTADO_VALIDACAO_OFFLINE_IA_SENSORES.md`. Até nova comparação e ensaio
+físico, o modelo permanece exploratório.
