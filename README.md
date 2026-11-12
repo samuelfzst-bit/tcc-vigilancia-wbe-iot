@@ -12,7 +12,7 @@ Protótipo de TCC para antecipação semanal do risco de leptospirose em São Pa
 - Divisão temporal fixa: treino até 2022, validação em 2023 e teste final em 2024.
 - Banco oficial do projeto: Supabase/PostgreSQL.
 
-O IoT é uma camada física real de aquisição e transmissão. Como ainda não existe uma série histórica longitudinal dos sensores compatível com o SINAN/INMET, suas leituras não foram usadas para treinar o modelo epidemiológico histórico. Em paralelo, a telemetria real alimenta uma segunda IA exploratória, baseada em Isolation Forest, que detecta mudanças multivariadas incomuns entre leituras consecutivas. Ela não diagnostica leptospirose, contaminação ou qualidade da água. As duas IAs são integradas na aplicação, mas avaliadas separadamente.
+O IoT é uma camada física real de aquisição e transmissão. Como ainda não existe uma série histórica longitudinal dos sensores compatível com o SINAN/INMET, suas leituras não foram usadas para treinar o modelo epidemiológico histórico. Em paralelo, a telemetria real alimenta uma segunda IA exploratória, baseada em Isolation Forest, que detecta mudanças multivariadas incomuns entre leituras consecutivas. Um challenger Extra Trees treinado com perturbações sintéticas permanece em avaliação e ainda não substitui o modelo ativo. Nenhum desses detectores diagnostica leptospirose, contaminação ou qualidade da água. As duas trilhas de IA são integradas na aplicação, mas avaliadas separadamente.
 
 ## Estrutura
 
@@ -48,6 +48,9 @@ A validação reproduzível da IA dos sensores está em
 previamente e o resultado da primeira execução ficam em
 `docs/metodologia/PROTOCOLO_VALIDACAO_IA_SENSORES.md` e
 `docs/metodologia/RESULTADO_VALIDACAO_OFFLINE_IA_SENSORES.md`.
+O challenger V2 pode ser reproduzido em
+`notebooks/05_validacao_challenger_ia_sensores.ipynb`; sua comparação e regra de
+promoção estão em `docs/metodologia/RESULTADO_CHALLENGER_V2_IA_SENSORES.md`.
 
 ## Executar o dashboard
 

@@ -1,0 +1,280 @@
+{
+  "summary": {
+    "model_version": "sensor_extratrees_synthetic_v2_20261111",
+    "reference_rows": 1263,
+    "fit_natural_rows": 757,
+    "fit_total_rows_after_augmentation": 4542,
+    "calibration_rows": 253,
+    "test_rows": 253,
+    "fit_end": "2026-10-08T02:33:33+00:00",
+    "calibration_start": "2026-10-08T02:33:42+00:00",
+    "calibration_end": "2026-10-08T03:52:21+00:00",
+    "test_start": "2026-10-08T03:52:24+00:00",
+    "test_end": "2026-10-10T21:35:25+00:00",
+    "calibration_quantile": 0.95,
+    "decision_threshold": 0.41935708085469947,
+    "natural_test_flag_rate": 0.03162055335968379
+  },
+  "grid": [
+    {
+      "scenario": "natural",
+      "sensor": "none",
+      "magnitude": 0.0,
+      "detection_rate": 0.03162055335968379,
+      "lift_vs_natural": 0.0,
+      "median_probability": 0.1038081350471866,
+      "p90_probability": 0.23921516784855734
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "ph_value",
+      "magnitude": 0.25,
+      "detection_rate": 0.03162055335968379,
+      "lift_vs_natural": 0.0,
+      "median_probability": 0.1658429190059558,
+      "p90_probability": 0.2902687635780137
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "ph_value",
+      "magnitude": 0.5,
+      "detection_rate": 0.06719367588932806,
+      "lift_vs_natural": 0.03557312252964427,
+      "median_probability": 0.21536591395810736,
+      "p90_probability": 0.38995603361023784
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "ph_value",
+      "magnitude": 1.0,
+      "detection_rate": 0.9960474308300395,
+      "lift_vs_natural": 0.9644268774703557,
+      "median_probability": 0.6096820444436595,
+      "p90_probability": 0.695219822453804
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "ph_value",
+      "magnitude": 2.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.7300753584334171,
+      "p90_probability": 0.7796783276615802
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "ph_value",
+      "magnitude": 3.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.4936900888034002,
+      "p90_probability": 0.6151703407227548
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "turbidity_value",
+      "magnitude": 2.0,
+      "detection_rate": 0.26877470355731226,
+      "lift_vs_natural": 0.23715415019762848,
+      "median_probability": 0.38981349265351206,
+      "p90_probability": 0.48854676786626544
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "turbidity_value",
+      "magnitude": 5.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.8864152221602662,
+      "p90_probability": 0.9440977887905226
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "turbidity_value",
+      "magnitude": 10.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9629861423066987,
+      "p90_probability": 0.9954495838974149
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "turbidity_value",
+      "magnitude": 20.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.989774375892955,
+      "p90_probability": 0.9988233020492797
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "turbidity_value",
+      "magnitude": 40.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9929646955674029,
+      "p90_probability": 0.9988233020492797
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "tds_value",
+      "magnitude": 2.0,
+      "detection_rate": 0.15019762845849802,
+      "lift_vs_natural": 0.11857707509881422,
+      "median_probability": 0.2717156090822362,
+      "p90_probability": 0.483106111743332
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "tds_value",
+      "magnitude": 5.0,
+      "detection_rate": 0.9723320158102767,
+      "lift_vs_natural": 0.9407114624505929,
+      "median_probability": 0.6609252863198368,
+      "p90_probability": 0.9094243868458203
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "tds_value",
+      "magnitude": 10.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9850936753242371,
+      "p90_probability": 0.9887617319503507
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "tds_value",
+      "magnitude": 25.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9961003113362521,
+      "p90_probability": 0.9975966353652139
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "tds_value",
+      "magnitude": 50.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9989071035562235,
+      "p90_probability": 0.9990748887911229
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "temperature_value",
+      "magnitude": 0.25,
+      "detection_rate": 0.09090909090909091,
+      "lift_vs_natural": 0.05928853754940712,
+      "median_probability": 0.297754746525562,
+      "p90_probability": 0.39160736638929816
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "temperature_value",
+      "magnitude": 0.5,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.6159753573894303,
+      "p90_probability": 0.6903401650021791
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "temperature_value",
+      "magnitude": 1.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9641870717493227,
+      "p90_probability": 0.9912791056971046
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "temperature_value",
+      "magnitude": 2.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9866760374265107,
+      "p90_probability": 0.9974644302841125
+    },
+    {
+      "scenario": "single_sensor",
+      "sensor": "temperature_value",
+      "magnitude": 4.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9906144958976104,
+      "p90_probability": 0.9974644302841125
+    },
+    {
+      "scenario": "multivariate",
+      "sensor": "all",
+      "magnitude": 0.25,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9987662468158143,
+      "p90_probability": 1.0
+    },
+    {
+      "scenario": "multivariate",
+      "sensor": "all",
+      "magnitude": 0.5,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9990748887911229,
+      "p90_probability": 1.0
+    },
+    {
+      "scenario": "multivariate",
+      "sensor": "all",
+      "magnitude": 1.0,
+      "detection_rate": 1.0,
+      "lift_vs_natural": 0.9683794466403162,
+      "median_probability": 0.9990748887911229,
+      "p90_probability": 1.0
+    }
+  ],
+  "criteria": [
+    {
+      "criterion": "Taxa natural ≤ 10%",
+      "observed": 0.03162055335968379,
+      "target": 0.1,
+      "passed": true
+    },
+    {
+      "criterion": "Multivariado moderado ≥ 70%",
+      "observed": 1.0,
+      "target": 0.7,
+      "passed": true
+    },
+    {
+      "criterion": "Multivariado forte ≥ 90%",
+      "observed": 1.0,
+      "target": 0.9,
+      "passed": true
+    },
+    {
+      "criterion": "ph_value forte ≥ 50%",
+      "observed": 1.0,
+      "target": 0.5,
+      "passed": true
+    },
+    {
+      "criterion": "turbidity_value forte ≥ 50%",
+      "observed": 1.0,
+      "target": 0.5,
+      "passed": true
+    },
+    {
+      "criterion": "tds_value forte ≥ 50%",
+      "observed": 1.0,
+      "target": 0.5,
+      "passed": true
+    },
+    {
+      "criterion": "temperature_value forte ≥ 50%",
+      "observed": 1.0,
+      "target": 0.5,
+      "passed": true
+    }
+  ]
+}

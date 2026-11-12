@@ -1,0 +1,26 @@
+{
+  "model_version": "sensor_extratrees_synthetic_v2_20261111",
+  "reference_rows": 1263,
+  "fit_natural_rows": 757,
+  "fit_total_rows_after_augmentation": 4542,
+  "calibration_rows": 253,
+  "test_rows": 253,
+  "fit_end": "2026-10-08T02:33:33+00:00",
+  "calibration_start": "2026-10-08T02:33:42+00:00",
+  "calibration_end": "2026-10-08T03:52:21+00:00",
+  "test_start": "2026-10-08T03:52:24+00:00",
+  "test_end": "2026-10-10T21:35:25+00:00",
+  "calibration_quantile": 0.95,
+  "decision_threshold": 0.41935708085469947,
+  "natural_test_flag_rate": 0.03162055335968379,
+  "algorithm": "ExtraTreesClassifier",
+  "acceptance_passed": 7,
+  "acceptance_total": 7,
+  "all_offline_criteria_passed": true,
+  "limitations": [
+    "rótulos positivos são perturbações sintéticas, não eventos físicos",
+    "taxa natural não equivale a falso positivo comprovado",
+    "não há interpretação sanitária ou diagnóstico de leptospirose",
+    "promoção depende de ensaio físico controlado"
+  ]
+}

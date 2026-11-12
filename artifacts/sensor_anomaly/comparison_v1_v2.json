@@ -1,0 +1,102 @@
+{
+  "same_final_test_period": true,
+  "v1": {
+    "model": "IsolationForest",
+    "criteria_passed": 5,
+    "criteria_total": 7,
+    "criteria": [
+      {
+        "criterion": "Taxa natural ≤ 10%",
+        "observed": 0.05138339920948617,
+        "target": 0.1,
+        "passed": true
+      },
+      {
+        "criterion": "Multivariado moderado ≥ 70%",
+        "observed": 1.0,
+        "target": 0.7,
+        "passed": true
+      },
+      {
+        "criterion": "Multivariado forte ≥ 90%",
+        "observed": 1.0,
+        "target": 0.9,
+        "passed": true
+      },
+      {
+        "criterion": "ph_value forte ≥ 50%",
+        "observed": 0.4308300395256917,
+        "target": 0.5,
+        "passed": false
+      },
+      {
+        "criterion": "turbidity_value forte ≥ 50%",
+        "observed": 0.7035573122529645,
+        "target": 0.5,
+        "passed": true
+      },
+      {
+        "criterion": "tds_value forte ≥ 50%",
+        "observed": 0.09090909090909091,
+        "target": 0.5,
+        "passed": false
+      },
+      {
+        "criterion": "temperature_value forte ≥ 50%",
+        "observed": 0.5138339920948617,
+        "target": 0.5,
+        "passed": true
+      }
+    ]
+  },
+  "v2": {
+    "model": "ExtraTreesClassifier com perturbações sintéticas",
+    "criteria_passed": 7,
+    "criteria_total": 7,
+    "criteria": [
+      {
+        "criterion": "Taxa natural ≤ 10%",
+        "observed": 0.03162055335968379,
+        "target": 0.1,
+        "passed": true
+      },
+      {
+        "criterion": "Multivariado moderado ≥ 70%",
+        "observed": 1.0,
+        "target": 0.7,
+        "passed": true
+      },
+      {
+        "criterion": "Multivariado forte ≥ 90%",
+        "observed": 1.0,
+        "target": 0.9,
+        "passed": true
+      },
+      {
+        "criterion": "ph_value forte ≥ 50%",
+        "observed": 1.0,
+        "target": 0.5,
+        "passed": true
+      },
+      {
+        "criterion": "turbidity_value forte ≥ 50%",
+        "observed": 1.0,
+        "target": 0.5,
+        "passed": true
+      },
+      {
+        "criterion": "tds_value forte ≥ 50%",
+        "observed": 1.0,
+        "target": 0.5,
+        "passed": true
+      },
+      {
+        "criterion": "temperature_value forte ≥ 50%",
+        "observed": 1.0,
+        "target": 0.5,
+        "passed": true
+      }
+    ]
+  },
+  "decision": "manter V1 no dashboard até ensaio físico controlado do V2"
+}

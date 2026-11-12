@@ -8,6 +8,12 @@ Ordem oficial:
 4. `04_avaliacao_final_2024_colab.ipynb`: congela o protocolo e, após confirmação explícita, abre 2024 uma única vez para o teste final.
 5. `05_analise_pos_hoc_2024_colab.ipynb`: audita erros, limiares e coeficientes depois do teste, sem retreinar ou substituir o modelo congelado.
 
+Validação da trilha IoT, separada do modelo epidemiológico:
+
+- `04_validacao_ia_sensores.ipynb`: valida o Isolation Forest V1.
+- `05_validacao_challenger_ia_sensores.ipynb`: compara V1 e Extra Trees V2 no
+  mesmo teste temporal. O V2 não é promovido sem ensaio físico controlado.
+
 O treino v2 usa `scripts/train_models_v2.py`. O script não possui opção para abrir
 o teste de 2024 e salva os resultados em `MyDrive/TCC/model_runs_v2`.
 
