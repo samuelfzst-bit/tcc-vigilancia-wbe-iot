@@ -16,6 +16,27 @@ arquitetura da interface, aumentando o risco sem melhorar a entrega acadêmica.
 - Dependências de publicação: `frontend/requirements.txt` referencia o conjunto
   mínimo do painel em `requirements/frontend.txt`.
 
+### Homologação da IA dos sensores
+
+Para conferir a nova integração sem alterar a entrega estável, publique uma
+aplicação de homologação separada apontando para `feature/iot-anomaly-ai`, com
+`frontend/app.py` e Python 3.12. Não é necessário alterar `main` nem
+`integration/tcc-final`.
+
+A aba **IA dos Sensores** mantém o Isolation Forest V1. O controle **Exibir
+comparação com a V2 experimental**, desligado inicialmente, executa o artefato
+Extra Trees congelado sobre o mesmo dispositivo e período. A tela apresenta
+sinalizações, divergências e exportação da comparação. Não há treinamento nem
+gravação no banco durante essa inferência.
+
+Mais sinalizações ou concordância entre modelos não comprovam acurácia. A V2
+permanece candidata até concluir o ensaio físico e conferir a calibração.
+
+Antes de divulgar a homologação, conferir as seis abas, habilitar a comparação,
+trocar dispositivo e período, exportar o resultado e confirmar ausência de
+exceções. Verificar a leitura real das três fontes com uma credencial de somente
+leitura cadastrada nos segredos da plataforma.
+
 Cadastre no gerenciador de segredos da plataforma, nunca no Git:
 
 ```toml

@@ -30,7 +30,10 @@ from frontend.query_service import (
     BRASILIA, REFRESH_SECONDS, ConfigurationError, execute_read, latest_success_at, load_local_secrets,
     refresh_due, update_status,
 )
-from frontend.sensor_ai import load_sensor_ai_bundle, run_sensor_ai, summarize_sensor_ai
+from frontend.sensor_ai import (
+    load_sensor_ai_bundle, run_sensor_ai, summarize_sensor_ai,
+    load_sensor_challenger_bundle, compare_sensor_models,
+)
 apply_style()
 
 @st.cache_resource(show_spinner=False)
@@ -47,6 +50,11 @@ def get_engine():
 @st.cache_resource(show_spinner=False)
 def get_sensor_ai_bundle():
     return load_sensor_ai_bundle()
+
+
+@st.cache_resource(show_spinner=False)
+def get_sensor_challenger_bundle():
+    return load_sensor_challenger_bundle()
 
 
 @st.cache_data(ttl=REFRESH_SECONDS, max_entries=1, show_spinner=False)
@@ -550,6 +558,100 @@ with sensor_ai_tab:
             with st.expander("Conferir inferências • mais recentes primeiro"):
                 table(sensor_ai_filtered.reindex(columns=output_columns),width="stretch",hide_index=True)
                 export(sensor_ai_filtered.reindex(columns=output_columns),"inferencia_ia_sensores")
+
+    st.divider()
+    st.subheader("Comparação experimental: V1 × V2")
+    st.warning(
+        "A V2 Extra Trees é uma candidata treinada com perturbações sintéticas. "
+        "A validação física ainda está em andamento, incluindo a conferência de "
+        "calibração dos sensores. Esta comparação não promove nem retreina o modelo."
+    )
+    show_challenger = st.toggle(
+        "Exibir comparação com a V2 experimental", value=False, key="show_challenger_v2",
+    )
+    if show_challenger and selected.empty:
+        st.info("Não há leituras disponíveis para comparar os modelos.")
+    elif show_challenger:
+        try:
+            challenger_bundle = get_sensor_challenger_bundle()
+            comparison = compare_sensor_models(
+                get_sensor_ai_bundle(), challenger_bundle, selected,
+            )
+            comparison["data_hora"] = pd.to_datetime(
+                comparison["data_hora"], utc=True,
+            ).dt.tz_convert(BRASILIA)
+            if filtered.empty:
+                comparison = comparison.iloc[:0].copy()
+            else:
+                comparison = comparison.loc[
+                    comparison["data_hora"].ge(filtered["data_hora"].min())
+                    & comparison["data_hora"].le(filtered["data_hora"].max())
+                ].copy()
+            eligible_comparison = comparison.loc[comparison["concordancia"].notna()]
+            if eligible_comparison.empty:
+                st.info("Nenhum par elegível no período selecionado.")
+            else:
+                total = len(eligible_comparison)
+                v1_flags = int(eligible_comparison["is_anomaly"].sum())
+                v2_flags = int(eligible_comparison["is_anomaly_v2"].sum())
+                disagreements = int(eligible_comparison["concordancia"].eq(False).sum())
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("Pares comparáveis", str(total))
+                c2.metric("Sinalizações V1", str(v1_flags))
+                c3.metric("Sinalizações V2", str(v2_flags))
+                c4.metric("Classificações diferentes", str(disagreements))
+                st.caption(
+                    "Mais sinalizações não significam melhor desempenho. "
+                    "Concordância entre modelos não é acurácia. "
+                    "Leituras indisponíveis não são classificadas como normais."
+                )
+                threshold_v2 = float(challenger_bundle["threshold"])
+                fig_v2 = go.Figure()
+                plot_v2 = break_line_at_gaps(comparison, ["anomaly_probability_v2"])
+                fig_v2.add_trace(go.Scatter(
+                    x=plot_v2["data_hora"], y=plot_v2["anomaly_probability_v2"],
+                    name="Pontuação V2", mode="lines", connectgaps=False,
+                    line=dict(color="#a78bfa", width=2),
+                ))
+                fig_v2.add_hline(
+                    y=threshold_v2, line_dash="dash", line_color="#f59e0b",
+                    annotation_text="Limiar congelado da V2",
+                )
+                flagged_v2 = comparison.loc[comparison["is_anomaly_v2"].eq(True)]
+                fig_v2.add_trace(go.Scatter(
+                    x=flagged_v2["data_hora"], y=flagged_v2["anomaly_probability_v2"],
+                    name="Sinalização V2", mode="markers", marker=dict(color="#ef4444", size=8),
+                ))
+                fig_v2.update_layout(
+                    title="V2 experimental no período selecionado",
+                    xaxis_title="Horário (Brasília)", yaxis_title="Pontuação V2 (0–1)",
+                    yaxis=dict(range=[0, 1]), hovermode="x unified", height=430,
+                )
+                show(fig_v2)
+                st.caption(
+                    "A pontuação mede a resposta do classificador às mudanças dos sensores. "
+                    "Ela não é uma probabilidade de contaminação nem de leptospirose. "
+                    "Os escores de V1 e V2 têm escalas diferentes."
+                )
+                comparison_output = comparison[[
+                    "device_id", "data_hora", "anomaly_score", "is_anomaly",
+                    "anomaly_probability_v2", "is_anomaly_v2", "concordancia",
+                    "model_version", "model_version_v2",
+                ]].rename(columns={
+                    "anomaly_score": "Escore V1", "is_anomaly": "Sinalização V1",
+                    "anomaly_probability_v2": "Pontuação V2", "is_anomaly_v2": "Sinalização V2",
+                    "concordancia": "Mesma classificação",
+                    "model_version": "Versão V1", "model_version_v2": "Versão V2",
+                })
+                with st.expander("Conferir e exportar a comparação"):
+                    table(comparison_output, width="stretch", hide_index=True)
+                    export(comparison_output, "comparacao_v1_v2_experimental")
+                st.caption(f"Versão candidata: {challenger_bundle['metadata']['model_version']}")
+        except Exception:
+            st.error(
+                "A comparação V2 está indisponível. Confira o artefato e as dependências. "
+                "A inferência V1 permanece independente da comparação."
+            )
 with entries:
     st.subheader("Qualidade e Disponibilidade dos Dados")
     with st.container(border=True):

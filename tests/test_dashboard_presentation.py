@@ -83,6 +83,12 @@ def test_dashboard_renders_without_database(monkeypatch, empty):
     assert not any("Consulta da tela:" in c.value for c in app.caption)
     assert any("Atualizado às" in m.value for m in app.markdown)
     if not empty:
+        assert app.toggle(key="show_challenger_v2").value is False
+        app.toggle(key="show_challenger_v2").set_value(True).run(timeout=45)
+        assert not app.exception
+        assert not app.error
+        assert any(metric.label == "Pares comparáveis" for metric in app.metric)
+        assert any("não promove nem retreina" in warning.value for warning in app.warning)
         period = app.selectbox(key="recent_period")
         assert period.value == "Últimas 24h disponíveis"
         app.selectbox(key="forecast_weeks").set_value(26).run(timeout=45)
