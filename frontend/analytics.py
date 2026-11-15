@@ -9,8 +9,8 @@ import pandas as pd
 
 LABELS = {
     "ph_value": "pH",
-    "turbidity_value": "Turbidez (leitura experimental)",
-    "tds_value": "TDS (leitura experimental)",
+    "turbidity_value": "Turbidez",
+    "tds_value": "TDS",
     "temperature_value": "Temperatura (°C)",
 }
 MIN_HISTORY = 12

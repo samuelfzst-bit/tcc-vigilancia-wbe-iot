@@ -476,9 +476,9 @@ with detail:
 
 
 with sensor_ai_tab:
-    st.subheader("IA dos Sensores — detecção multivariada exploratória")
+    st.subheader("IA dos Sensores — detecção de mudanças")
     st.caption(
-        "O Isolation Forest recebe diretamente as mudanças entre leituras de pH, "
+        "V1 · Isolation Forest. O modelo analisa as mudanças entre leituras de pH, "
         "turbidez, TDS e temperatura. Ele identifica padrões incomuns em relação ao "
         "histórico do protótipo; não diagnostica leptospirose, contaminação ou qualidade da água."
     )
@@ -522,7 +522,7 @@ with sensor_ai_tab:
             )
             show(fig)
 
-            with st.expander("Validação e limitações do modelo", expanded=True):
+            with st.expander("Metodologia e avaliação da V1", expanded=False):
                 metadata = get_sensor_ai_bundle()["metadata"]
                 st.write(
                     f"A referência contém **{metadata['reference_rows']} mudanças reais válidas**. "
@@ -548,7 +548,7 @@ with sensor_ai_tab:
                     "Sensibilidade": st.column_config.ProgressColumn(format="%.1f%%", min_value=0, max_value=100)
                 })
                 st.caption("As perturbações são testes artificiais de sensibilidade, não rótulos de eventos reais. A sensibilidade por sensor varia — especialmente para TDS — e permanece uma limitação explícita. Sem rótulos de campo, não calculamos acurácia, precisão, recall ou F1 clínico/sanitário.")
-                st.warning("Na grade ampliada com critérios definidos antes da execução, o modelo passou em 5 de 7 critérios. pH forte atingiu 43,08% e TDS forte 9,09%, abaixo da meta de 50%. A versão permanece exploratória até comparação com uma candidata e ensaio físico controlado.")
+                st.write("Na grade ampliada de perturbações sintéticas, a V1 cumpriu 5 de 7 critérios. pH forte atingiu 43,08% e TDS forte 9,09%, abaixo da meta de 50%. Esses resultados motivaram o desenvolvimento da V2. As métricas sintéticas não comprovam desempenho em campo.")
 
             output_columns = [
                 "data_hora", *LABELS, "delta_ph_value", "delta_turbidity_value",
@@ -560,14 +560,14 @@ with sensor_ai_tab:
                 export(sensor_ai_filtered.reindex(columns=output_columns),"inferencia_ia_sensores")
 
     st.divider()
-    st.subheader("Comparação experimental: V1 × V2")
-    st.warning(
-        "A V2 Extra Trees é uma candidata treinada com perturbações sintéticas. "
-        "A validação física ainda está em andamento, incluindo a conferência de "
-        "calibração dos sensores. Esta comparação não promove nem retreina o modelo."
-    )
+    st.subheader("Comparação dos modelos V1 e V2")
+    st.caption("V1 · Isolation Forest | V2 · Extra Trees. Comparação das sinalizações no mesmo dispositivo e período.")
+    with st.expander("Metodologia e avaliação da V2", expanded=False):
+        st.write("A V2 foi treinada com telemetria de referência e perturbações sintéticas e cumpriu os sete critérios de avaliação offline. Isso não equivale a 100% de acurácia em eventos reais.")
+        st.write("No ensaio de bancada de 15/11/2026, a V2 foi aplicada sem reajuste às leituras posteriores ao treinamento. Sinalizou mudanças associadas à entrada e à retirada da solução salina, além de oscilações dentro dos blocos. A primeira leitura do bloco com terra não foi sinalizada. O ensaio não comprova classificação dos tipos de água.")
+        st.caption("A calibração e a quantidade de intervenções limitam a avaliação física. Os modelos detectam mudanças na telemetria; não determinam potabilidade, contaminação ou presença de Leptospira. Esta comparação não promove nem retreina os artefatos.")
     show_challenger = st.toggle(
-        "Exibir comparação com a V2 experimental", value=False, key="show_challenger_v2",
+        "Exibir comparação com a V2", value=False, key="show_challenger_v2",
     )
     if show_challenger and selected.empty:
         st.info("Não há leituras disponíveis para comparar os modelos.")
@@ -623,7 +623,7 @@ with sensor_ai_tab:
                     name="Sinalização V2", mode="markers", marker=dict(color="#ef4444", size=8),
                 ))
                 fig_v2.update_layout(
-                    title="V2 experimental no período selecionado",
+                    title="Sinalizações da V2 no período selecionado",
                     xaxis_title="Horário (Brasília)", yaxis_title="Pontuação V2 (0–1)",
                     yaxis=dict(range=[0, 1]), hovermode="x unified", height=430,
                 )
@@ -646,7 +646,7 @@ with sensor_ai_tab:
                 with st.expander("Conferir e exportar a comparação"):
                     table(comparison_output, width="stretch", hide_index=True)
                     export(comparison_output, "comparacao_v1_v2_experimental")
-                st.caption(f"Versão candidata: {challenger_bundle['metadata']['model_version']}")
+                st.caption(f"Versão V2: {challenger_bundle['metadata']['model_version']}")
         except Exception:
             st.error(
                 "A comparação V2 está indisponível. Confira o artefato e as dependências. "

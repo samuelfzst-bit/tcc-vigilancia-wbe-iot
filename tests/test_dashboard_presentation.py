@@ -88,7 +88,7 @@ def test_dashboard_renders_without_database(monkeypatch, empty):
         assert not app.exception
         assert not app.error
         assert any(metric.label == "Pares comparáveis" for metric in app.metric)
-        assert any("não promove nem retreina" in warning.value for warning in app.warning)
+        assert any("não promove nem retreina" in caption.value for caption in app.caption)
         period = app.selectbox(key="recent_period")
         assert period.value == "Últimas 24h disponíveis"
         app.selectbox(key="forecast_weeks").set_value(26).run(timeout=45)
